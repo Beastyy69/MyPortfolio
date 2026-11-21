@@ -147,7 +147,8 @@ npm run dev        # http://localhost:5173
 ## Project structure
 
 ```
-├── index.html                 HTML entry: meta tags, fonts, #root
+├── index.html                 HTML entry: SEO meta tags, structured data, fonts, #root
+├── docs/email/                branded EmailJS templates (notification + auto-reply)
 ├── public/
 │   ├── favicon.svg            HS tab icon
 │   ├── Harshit_Shaw_Resume.pdf
@@ -295,11 +296,25 @@ Any static host works — the build is plain files in `dist/`.
   link previews a proper icon and preview card.
 
 **Contact form → email**
-- Messages are delivered to `mohitshaw236@gmail.com` through [FormSubmit](https://formsubmit.co)
-  (no account or API key). The visitor's address is set as reply‑to.
-- **One‑time step:** the very first message sent from the live site triggers a
-  FormSubmit activation email to that inbox — click *Activate* once, and every
-  message after that arrives normally.
+
+The form can deliver messages two ways:
+
+1. **EmailJS — branded emails (recommended).** Uses the templates in `docs/email/`:
+   `notification.html` (the message, designed like the site, with a *Reply* button) and
+   `auto-reply.html` (a branded "thanks" sent to the visitor).
+   1. Create a free account at [emailjs.com](https://www.emailjs.com) → **Email Services** →
+      **Add service → Gmail** and connect `mohitshaw236@gmail.com`. Copy the **Service ID**.
+   2. **Email Templates → Create** → open the **Code editor**, paste `docs/email/notification.html`.
+      Set *Subject* `New portfolio message from {{name}}`, *To Email* `mohitshaw236@gmail.com`,
+      *Reply To* `{{reply_to}}`. Save and copy the **Template ID**.
+   3. (Optional) Create a second template from `docs/email/auto-reply.html` with *To Email*
+      `{{email}}` and *Subject* `Thanks for your message, {{name}}`. Copy its Template ID.
+   4. **Account → General** → copy the **Public Key**.
+   5. Add to Render → Environment (see `.env.example`): `VITE_EMAILJS_SERVICE_ID`,
+      `VITE_EMAILJS_TEMPLATE_ID`, `VITE_EMAILJS_PUBLIC_KEY`, and optionally
+      `VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID`, then redeploy.
+2. **FormSubmit — automatic fallback.** Used whenever the EmailJS keys are not set; no
+   account needed. The first message triggers a one‑time *Activate Form* email.
 
 ---
 

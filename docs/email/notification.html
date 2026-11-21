@@ -1,0 +1,91 @@
+<!--
+  EmailJS template — "New message" notification sent to me.
+  Paste this whole file into EmailJS → Email Templates → (your template) → Content → Code editor.
+  Template settings:  To Email: mohitshaw236@gmail.com   Reply To: {{reply_to}}
+                      Subject:  New portfolio message from {{name}}
+  Variables sent by the site: {{name}} {{email}} {{message}} {{time}} {{reply_to}} {{page}}
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>New portfolio message</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#0c1018;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0c1018;">
+      <tr>
+        <td align="center" style="padding:32px 14px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
+            <!-- header -->
+            <tr>
+              <td style="padding:0 4px 18px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="vertical-align:middle;">
+                      <img src="https://harshitshaw.in/icon-192.png" width="44" height="44" alt="HS" style="display:block; border:0; border-radius:10px;" />
+                    </td>
+                    <td style="vertical-align:middle; padding-left:12px; font-family:Segoe UI, Helvetica, Arial, sans-serif;">
+                      <div style="font-size:16px; font-weight:700; color:#f4f0e8; letter-spacing:-0.2px;">Harshit Shaw</div>
+                      <div style="font-size:12px; color:#a7b9a3; font-family:Consolas, Menlo, monospace; letter-spacing:1px;">PORTFOLIO · NEW MESSAGE</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- card -->
+            <tr>
+              <td style="background-color:#151c29; border:1px solid #273042; border-top:3px solid #b89b68; border-radius:12px; padding:30px 30px 26px;">
+                <div style="font-family:Consolas, Menlo, monospace; font-size:11px; letter-spacing:1.5px; color:#a7b9a3; text-transform:uppercase;">transmission received</div>
+                <h1 style="margin:10px 0 6px; font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:24px; line-height:1.25; font-weight:700; color:#f4f0e8;">
+                  {{name}} sent you a message
+                </h1>
+                <div style="font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:13px; color:#8a93a1;">{{time}}</div>
+
+                <!-- sender -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:22px;">
+                  <tr>
+                    <td style="padding:12px 14px; background-color:#0f141e; border:1px solid #273042; border-radius:8px 8px 0 0; border-bottom:0;">
+                      <div style="font-family:Consolas, Menlo, monospace; font-size:10px; letter-spacing:1.5px; color:#8a93a1; text-transform:uppercase;">Name</div>
+                      <div style="margin-top:4px; font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:15px; color:#f4f0e8;">{{name}}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 14px; background-color:#0f141e; border:1px solid #273042; border-radius:0 0 8px 8px;">
+                      <div style="font-family:Consolas, Menlo, monospace; font-size:10px; letter-spacing:1.5px; color:#8a93a1; text-transform:uppercase;">Email</div>
+                      <div style="margin-top:4px; font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:15px;">
+                        <a href="mailto:{{email}}" style="color:#d8c59d; text-decoration:none;">{{email}}</a>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- message -->
+                <div style="margin-top:22px; font-family:Consolas, Menlo, monospace; font-size:10px; letter-spacing:1.5px; color:#8a93a1; text-transform:uppercase;">Message</div>
+                <div style="margin-top:8px; padding:16px 18px; background-color:#0f141e; border-left:3px solid #b89b68; border-radius:4px; font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:15px; line-height:1.65; color:#e6e1d8; white-space:pre-wrap;">{{message}}</div>
+
+                <!-- action -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;">
+                  <tr>
+                    <td style="border-radius:999px; background-color:#f4f0e8;">
+                      <a href="mailto:{{email}}?subject=Re%3A%20your%20message%20on%20harshitshaw.in" style="display:inline-block; padding:12px 22px; font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:14px; font-weight:700; color:#0c1018; text-decoration:none;">Reply to {{name}} &rarr;</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- footer -->
+            <tr>
+              <td style="padding:18px 4px 0; font-family:Segoe UI, Helvetica, Arial, sans-serif; font-size:12px; line-height:1.6; color:#6f7888;">
+                Sent from the contact form on <a href="https://harshitshaw.in" style="color:#a7b9a3; text-decoration:none;">harshitshaw.in</a>. Replying to this email goes straight to {{email}}.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

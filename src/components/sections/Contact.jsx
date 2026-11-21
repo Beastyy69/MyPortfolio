@@ -14,8 +14,63 @@ import Icon from '../ui/Icon.jsx';
 import Button from '../ui/Button.jsx';
 import SignalField from '../effects/SignalField.jsx';
 
-// form → email: messages are delivered to my inbox through FormSubmit's AJAX endpoint
-const CONTACT_ENDPOINT = `https://formsubmit.co/ajax/${profile.email}`;
+/* ── form → email ──────────────────────────────────────────────
+   Preferred: EmailJS with my own branded templates (docs/email/*.html),
+   sent through my Gmail. Configure with environment variables:
+     VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY
+     VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID   (optional "thanks" email to the visitor)
+   Fallback (no keys set): FormSubmit, which needs no account. */
+const EMAILJS = {
+  service: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+  template: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+  autoReply: import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID,
+  key: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+};
+const useEmailJS = Boolean(EMAILJS.service && EMAILJS.template && EMAILJS.key);
+const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${profile.email}`;
+
+async function sendWithEmailJS(values) {
+  const params = {
+    name: values.name,
+    email: values.email,
+    reply_to: values.email,
+    message: values.message,
+    time: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }) + ' IST',
+    page: window.location.href,
+  };
+  const send = (template) =>
+    fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ service_id: EMAILJS.service, template_id: template, user_id: EMAILJS.key, template_params: params }),
+    });
+  const res = await send(EMAILJS.template);
+  if (!res.ok) return 'error';
+  // the visitor's "thanks" email is a courtesy: never fail the form over it
+  if (EMAILJS.autoReply) send(EMAILJS.autoReply).catch(() => {});
+  return 'sent';
+}
+
+async function sendWithFormSubmit(values) {
+  const res = await fetch(FORMSUBMIT_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      name: values.name,
+      email: values.email,
+      message: values.message,
+      _replyto: values.email,
+      _subject: `Portfolio message from ${values.name}`,
+      _template: 'table',
+      _captcha: 'false',
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && String(data.success) === 'true') return 'sent';
+  // FormSubmit's one-time setup: the inbox owner must click "Activate Form" first
+  if (/activat/i.test(data.message || '')) return 'activation';
+  return 'error';
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FIELDS = [
@@ -167,29 +222,9 @@ function Console() {
     setSending(true);
     setFailed(false);
     try {
-      // delivered to my inbox through FormSubmit (form → email); reply-to is the visitor
-      const res = await fetch(CONTACT_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          message: values.message,
-          _replyto: values.email,
-          _subject: `Portfolio message from ${values.name}`,
-          _template: 'table',
-          _captcha: 'false',
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && String(data.success) === 'true') {
-        setSent(true);
-      } else if (/activat/i.test(data.message || '')) {
-        // FormSubmit's one-time setup: the inbox owner must click "Activate Form" first
-        setFailed('activation');
-      } else {
-        setFailed('error');
-      }
+      const result = useEmailJS ? await sendWithEmailJS(values) : await sendWithFormSubmit(values);
+      if (result === 'sent') setSent(true);
+      else setFailed(result);
     } catch {
       setFailed('error');
     } finally {
