@@ -90,15 +90,18 @@ rail · layered parallax world backgrounds · optional background music (off by 
 
 ## Projects featured
 
-| Project | What it is | Role |
+Every entry below was verified against the repository's source code (dependency files,
+main modules, API routes and commit history) — not only its README.
+
+| Project | What it is (verified) | Role |
 |---|---|---|
-| ⭐ **[Hologram With AI](https://github.com/Beastyy69/Hologram-With-AI)** — *flagship* | Touchless, gesture‑controlled AR shapes, mouse control and air drawing with OpenCV + MediaPipe | Creator |
-| **[Mail Mind Pro](https://github.com/Beastyy69/Mail-Mind-Pro)** | AI email intelligence for Gmail with Gemini: intent, urgency, summaries, replies | Creator |
-| **[RugRadar](https://github.com/Beastyy69/RugRadar)** | Full‑stack crypto‑address risk scanner (React, Express + MongoDB, FastAPI) | Creator |
-| **[RoastMe AI](https://github.com/Beastyy69/RoastMe)** | AI humour app: scikit‑learn topic classifier + multi‑provider LLM roasts, web and Android | Creator |
-| **[Movie Recommendation (CineSense)](https://github.com/Beastyy69/MovieRecomendation)** | Local TF‑IDF movie recommendations with optional local Gemma explanations | Creator |
-| **[MultiDiscord Bot](https://github.com/Beastyy69/MultiDiscord-Bot)** | Multi‑purpose Discord bot: music, moderation, giveaways, chatbot | Creator |
-| **[Scheduler AI](https://github.com/joydeep-devx/scheduler.ai)** | AI smart‑classroom management with face‑recognition attendance | Contributor — face recognition |
+| ⭐ **[Hologram With AI](https://github.com/Beastyy69/Hologram-With-AI)** — *flagship* | Webcam gesture interface: MediaPipe hand tracking + Kalman smoothing; 3D wireframe models (23 presets), touchless mouse, air drawing and optional Gemini voice/text shapes | Owner |
+| **[Mail Mind Pro](https://github.com/Beastyy69/Mail-Mind-Pro)** | Gmail + Gemini 2.5 Flash: per‑email summary, intent, urgency, sentiment and reply suggestions; filters, search, CSV export | Owner |
+| **[RugRadar](https://github.com/Beastyy69/RugRadar)** | Crypto‑address risk scanner: auto chain detection, GoPlus / Chainabuse / OFAC / blocklist data, transparent rule‑based 0–100 score | Owner |
+| **[RoastMe AI](https://github.com/Beastyy69/RoastMe)** | Web + Android comedy app: scikit‑learn topic classifier, NVIDIA Nemotron / Gemini roasts with template fallback, NPC Meter, Camera Roast | Owner |
+| **[Movie Recommendation (CineSense)](https://github.com/Beastyy69/MovieRecomendation)** | TF‑IDF + cosine‑similarity recommendations over ~45,000 films, likes/dislikes in SQLite, optional Gemini assistant, TMDB posters | Owner |
+| **[MultiDiscord Bot](https://github.com/Beastyy69/MultiDiscord-Bot)** | Discord.js v12 bot with 130+ commands: music, moderation, economy, levels, giveaways, backups, suggestions | Owner |
+| **[Scheduler AI](https://github.com/joydeep-devx/scheduler.ai)** | Team smart‑classroom system (owned by joydeep‑devx) | Contributor — built the face‑recognition service |
 
 ---
 

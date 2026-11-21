@@ -134,15 +134,15 @@ function Dossier({ p }) {
       </div>
       <p className="out__text">{p.summary}</p>
       <div className="out__log">
-        <p className="out__label">Mission log</p>
+        <p className="out__label">Key features</p>
         <ul>
-          {p.highlights.map((h) => (
+          {p.features.map((h) => (
             <li key={h}>{h}</li>
           ))}
         </ul>
       </div>
       <div>
-        <p className="out__label">Supplies</p>
+        <p className="out__label">Tech stack</p>
         <ul className="out__stack">
           {p.stack.map((s) => (
             <li key={s}>{s}</li>
@@ -155,7 +155,7 @@ function Dossier({ p }) {
         </a>
         {p.live && (
           <a href={p.live} target="_blank" rel="noreferrer" className="out__btn" data-cursor-retro="Open">
-            <Icon name="external" size={16} /> Live site
+            <Icon name="external" size={16} /> Live demo
           </a>
         )}
       </div>

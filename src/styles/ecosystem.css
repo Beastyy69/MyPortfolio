@@ -63,15 +63,40 @@
   background: #0c1018;
   transform: rotate(45deg);
 }
-.eco__flag-caption {
+.eco__modes {
   position: absolute;
-  left: 22px;
-  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eco__modes li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
   font-family: var(--font-mono);
   font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(244, 240, 232, 0.5);
+  letter-spacing: 0.04em;
+  color: rgba(244, 240, 232, 0.75);
+  background: rgba(12, 16, 24, 0.7);
+  border: 1px solid rgba(167, 185, 163, 0.25);
+  border-radius: 4px;
+}
+.eco__modes b {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-weight: 600;
+  color: #0c1018;
+  background: #d8c59d;
+  border-radius: 3px;
 }
 .eco__flag-body {
   padding: clamp(28px, 3.4vw, 52px);
@@ -393,7 +418,19 @@
 }
 @media (max-width: 560px) {
   .eco__flag-stage {
-    min-height: 260px;
+    min-height: 280px;
+  }
+  .eco__modes {
+    left: 12px;
+    right: 0;
+    bottom: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-right: 12px;
+    scrollbar-width: none;
+  }
+  .eco__modes li {
+    flex: none;
   }
   .eco__rail {
     padding-left: 22px;

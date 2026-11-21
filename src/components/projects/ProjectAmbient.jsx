@@ -14,8 +14,9 @@ const BRASS = '#b89b68';
 const IVORY = '#f4f0e8';
 const loop = (duration, delay = 0) => ({ duration, delay, repeat: Infinity, ease: 'easeInOut' });
 
-/* Hologram With AI — a projection chamber: a projector base, a light cone,
-   a rotating wireframe shape and a tracked hand skeleton. */
+/* Hologram With AI — the app's own view: a rotating 3D wireframe model, a
+   MediaPipe hand skeleton inside a tracking box. (The five modes are shown
+   as chips by the flagship panel.) */
 const CUBE = [-1, 1].flatMap((x) => [-1, 1].flatMap((y) => [-1, 1].map((z) => [x, y, z])));
 const CUBE_EDGES = [];
 CUBE.forEach((a, i) => CUBE.forEach((b, j) => j > i && a.filter((v, k) => v !== b[k]).length === 1 && CUBE_EDGES.push([i, j])));
@@ -47,9 +48,9 @@ function Hologram({ still }) {
           <stop offset="1" stopColor={IVORY} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d="M262 330 L170 60 L430 60 L338 330 Z" fill="url(#amb-cone)" />
-      <ellipse cx="300" cy="334" rx="70" ry="12" fill="none" stroke={BRASS} strokeWidth="1.4" />
-      <ellipse cx="300" cy="334" rx="40" ry="6" fill={BRASS} opacity="0.35" />
+      <path d="M262 318 L170 50 L430 50 L338 318 Z" fill="url(#amb-cone)" />
+      <ellipse cx="300" cy="322" rx="70" ry="12" fill="none" stroke={BRASS} strokeWidth="1.4" />
+      <ellipse cx="300" cy="322" rx="40" ry="6" fill={BRASS} opacity="0.35" />
       {CUBE_EDGES.map(([i, j], k) => (
         <line key={k} x1={pts[i][0]} y1={pts[i][1]} x2={pts[j][0]} y2={pts[j][1]} stroke={IVORY} strokeOpacity="0.7" strokeWidth="1.3" />
       ))}
@@ -70,38 +71,80 @@ function Hologram({ still }) {
   );
 }
 
-/* Mail Mind Pro — messages arrive and are routed into sorted lanes. */
-const LANES = [
-  { y: 110, label: 'ACTION' },
-  { y: 200, label: 'MEETING' },
-  { y: 290, label: 'INFO' },
+/* Mail Mind Pro — the inbox dashboard: emails arrive, Gemini tags each one
+   with intent, urgency and sentiment and writes a summary + reply options. */
+const MAILS = [
+  { tags: [['Action Required', BRASS], ['High', BRASS]], w: 210 },
+  { tags: [['Meeting Request', IVORY], ['Medium', IVORY]], w: 170 },
+  { tags: [['Informational', SAGE], ['Low', SAGE]], w: 190 },
 ];
 function MailMind({ still }) {
   return (
     <>
-      {LANES.map((l, i) => (
-        <g key={l.label}>
-          <path d={`M60 200 C200 200 220 ${l.y} 330 ${l.y} L540 ${l.y}`} fill="none" stroke={SAGE_FAINT} strokeWidth="1.2" />
-          <text x="548" y={l.y + 4} fill={IVORY} opacity="0.5" fontSize="10" fontFamily="var(--font-mono)" letterSpacing="2" textAnchor="end">
-            {l.label}
-          </text>
-          <motion.g
-            initial={{ x: 60, y: 200, opacity: 0 }}
-            animate={still ? { x: 420, y: l.y, opacity: 1 } : { x: [60, 200, 330, 500], y: [200, 200, l.y, l.y], opacity: [0, 1, 1, 0] }}
-            transition={still ? { duration: 0 } : { duration: 4.2, delay: i * 1.4, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <rect x="-14" y="-9" width="28" height="18" rx="2" fill="none" stroke={i === 0 ? BRASS : IVORY} strokeWidth="1.3" />
-            <path d="M-14 -9 L0 2 L14 -9" fill="none" stroke={i === 0 ? BRASS : IVORY} strokeWidth="1.3" />
+      {/* inbox column */}
+      <rect x="60" y="52" width="250" height="300" rx="8" fill="none" stroke={SAGE_FAINT} strokeWidth="1.2" />
+      <text x="78" y="78" fill={IVORY} opacity="0.55" fontSize="11" fontFamily="var(--font-mono)" letterSpacing="2">
+        INBOX
+      </text>
+      {MAILS.map((m, i) => {
+        const y = 96 + i * 84;
+        return (
+          <motion.g key={i} initial={{ opacity: still ? 1 : 0, x: still ? 0 : -14 }} animate={still ? undefined : { opacity: [0, 1, 1, 0], x: [-14, 0, 0, 0] }} transition={{ duration: 7.5, delay: i * 0.6, repeat: Infinity, times: [0, 0.08, 0.9, 1] }}>
+            <rect x="74" y={y} width="222" height="70" rx="5" fill={IVORY} fillOpacity="0.03" stroke={i === 0 ? BRASS : SAGE_FAINT} strokeWidth="1.2" />
+            <rect x="88" y={y + 14} width="22" height="15" rx="2" fill="none" stroke={IVORY} strokeOpacity="0.7" strokeWidth="1.2" />
+            <path d={`M88 ${y + 14} L99 ${y + 23} L110 ${y + 14}`} fill="none" stroke={IVORY} strokeOpacity="0.7" strokeWidth="1.2" />
+            <path d={`M120 ${y + 18} h${m.w * 0.6} M120 ${y + 28} h${m.w * 0.45}`} stroke={IVORY} strokeOpacity="0.35" strokeWidth="2.4" strokeLinecap="round" />
+            {/* the AI tags appear after the email lands */}
+            <motion.g initial={{ opacity: still ? 1 : 0 }} animate={still ? undefined : { opacity: [0, 0, 1, 1, 0] }} transition={{ duration: 7.5, delay: i * 0.6, repeat: Infinity, times: [0, 0.18, 0.26, 0.9, 1] }}>
+              {m.tags.map(([label, c], k) => (
+                <g key={label}>
+                  <rect x={88 + k * 112} y={y + 40} width={k ? 52 : 104} height="18" rx="9" fill="none" stroke={c} strokeOpacity="0.8" strokeWidth="1.1" />
+                  <text x={88 + k * 112 + (k ? 26 : 52)} y={y + 52.5} textAnchor="middle" fill={c} fontSize="9" fontFamily="var(--font-mono)">
+                    {label}
+                  </text>
+                </g>
+              ))}
+            </motion.g>
           </motion.g>
-        </g>
+        );
+      })}
+      {/* AI summary + reply suggestions for the selected email */}
+      <path d="M296 131 C320 131 320 120 340 120" fill="none" stroke={BRASS} strokeOpacity="0.7" strokeWidth="1.2" />
+      <rect x="340" y="52" width="210" height="300" rx="8" fill="none" stroke={SAGE_FAINT} strokeWidth="1.2" />
+      <text x="358" y="78" fill={BRASS} fontSize="11" fontFamily="var(--font-mono)" letterSpacing="2">
+        GEMINI SUMMARY
+      </text>
+      {[0, 1, 2, 3].map((k) => (
+        <motion.line
+          key={k}
+          x1="358"
+          y1={100 + k * 16}
+          x2={358 + [170, 150, 164, 96][k]}
+          y2={100 + k * 16}
+          stroke={IVORY}
+          strokeOpacity="0.4"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          initial={{ pathLength: still ? 1 : 0 }}
+          animate={still ? undefined : { pathLength: [0, 1, 1, 0] }}
+          transition={{ duration: 7.5, delay: 1.4 + k * 0.25, repeat: Infinity, times: [0, 0.12, 0.85, 1] }}
+        />
       ))}
-      <circle cx="210" cy="200" r="16" fill="none" stroke={BRASS} strokeWidth="1.3" />
-      <circle cx="210" cy="200" r="4" fill={BRASS} />
+      <text x="358" y="192" fill={IVORY} opacity="0.55" fontSize="10" fontFamily="var(--font-mono)" letterSpacing="2">
+        SUGGESTED REPLIES
+      </text>
+      {[0, 1, 2].map((k) => (
+        <motion.g key={k} initial={{ opacity: still ? 1 : 0 }} animate={still ? undefined : { opacity: [0, 1, 1, 0] }} transition={{ duration: 7.5, delay: 2.4 + k * 0.3, repeat: Infinity, times: [0, 0.08, 0.86, 1] }}>
+          <rect x="358" y={206 + k * 42} width="176" height="32" rx="6" fill="none" stroke={k === 0 ? BRASS : SAGE_FAINT} strokeWidth="1.2" />
+          <path d={`M372 ${218 + k * 42} h${[120, 96, 110][k]} M372 ${227 + k * 42} h${[70, 84, 60][k]}`} stroke={IVORY} strokeOpacity="0.35" strokeWidth="2" strokeLinecap="round" />
+        </motion.g>
+      ))}
     </>
   );
 }
 
-/* RugRadar — a calm radar sweep with risk signals appearing. */
+/* RugRadar — the scanner sweeps an address's activity; findings appear and
+   push the transparent 0–100 risk meter (low / medium / high). */
 const BLIPS = [
   [370, 150, 0.4], [250, 240, 1.6], [340, 280, 2.6], [230, 140, 3.4], [400, 230, 4.4],
 ];
@@ -129,6 +172,22 @@ function Radar({ still }) {
         />
       ))}
       <rect x="326" y="268" width="28" height="24" fill="none" stroke={BRASS} strokeWidth="1.2" />
+      {/* the transparent 0–100 score: low 0–29 · medium 30–59 · high 60–100 */}
+      <g transform="translate(486 120)">
+        <text x="0" y="-12" fill={IVORY} opacity="0.55" fontSize="10" fontFamily="var(--font-mono)" letterSpacing="2">
+          RISK
+        </text>
+        <rect x="0" y="0" width="10" height="160" rx="5" fill="none" stroke={SAGE_FAINT} />
+        <rect x="0" y="0" width="10" height="64" rx="5" fill={BRASS} fillOpacity="0.55" />
+        <rect x="0" y="64" width="10" height="48" fill={IVORY} fillOpacity="0.2" />
+        <rect x="0" y="112" width="10" height="48" rx="5" fill={SAGE} fillOpacity="0.5" />
+        <motion.path d="M16 0 l10 -6 v12 z" fill={IVORY} initial={{ y: still ? 50 : 140 }} animate={still ? undefined : { y: [140, 120, 50, 50, 140] }} transition={{ duration: 6, repeat: Infinity, times: [0, 0.3, 0.55, 0.9, 1], ease: 'easeInOut' }} />
+        {['HIGH', 'MED', 'LOW'].map((t, i) => (
+          <text key={t} x="-8" y={[34, 92, 140][i]} textAnchor="end" fill={IVORY} opacity="0.45" fontSize="9" fontFamily="var(--font-mono)">
+            {t}
+          </text>
+        ))}
+      </g>
     </>
   );
 }
@@ -193,9 +252,10 @@ function Cinema({ still }) {
   );
 }
 
-/* MultiDiscord Bot — a hub sends messages out to server channels. */
+/* MultiDiscord Bot — one bot serving the server's channels: music,
+   moderation, giveaways, economy, welcome cards and levels. */
 const CHANNELS = [
-  [140, 110, '#music'], [460, 100, '#mod'], [520, 250, '#giveaway'], [300, 340, '#welcome'], [90, 270, '#chat'],
+  [140, 100, '#music'], [460, 96, '#moderation'], [530, 240, '#giveaways'], [400, 330, '#economy'], [200, 330, '#welcome'], [80, 230, '#levels'],
 ];
 function Hub({ still }) {
   return (
@@ -256,11 +316,11 @@ function Scheduler({ still }) {
 
 const SCENES = { hologram: Hologram, mailmind: MailMind, rugradar: Radar, roastme: Roast, cinesense: Cinema, discordbot: Hub, scheduler: Scheduler };
 
-export default function ProjectAmbient({ id, still = false, className = '' }) {
+export default function ProjectAmbient({ id, still = false, className = '', fit = 'slice' }) {
   const Scene = SCENES[id];
   if (!Scene) return null;
   return (
-    <svg className={`amb ${className}`} viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <svg className={`amb ${className}`} viewBox="0 0 600 400" preserveAspectRatio={`xMidYMid ${fit}`} aria-hidden="true">
       <rect width="600" height="400" fill="url(#amb-grid)" />
       <defs>
         <pattern id="amb-grid" width="40" height="40" patternUnits="userSpaceOnUse">

@@ -25,7 +25,7 @@ export const SOCIALS = [
 ];
 const ext = (href) => (href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {});
 
-const BUILDING = 'CineSense — TF‑IDF movie recommendations with optional local Gemma explanations, after RoastMe AI and Hologram With AI.';
+const BUILDING = 'CineSense — TF‑IDF movie recommendations with a Gemini assistant, after RoastMe AI and Hologram With AI.';
 
 /* ───────── AI: Developer Desk ───────── */
 const ROLES = [

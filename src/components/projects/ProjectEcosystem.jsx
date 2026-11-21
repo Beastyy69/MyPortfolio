@@ -28,7 +28,7 @@ function LiveButton({ p }) {
   if (!p.live) return null;
   return (
     <a href={p.live} target="_blank" rel="noreferrer" className="eco__btn" data-cursor="Open">
-      <Icon name="external" size={16} /> Live site
+      <Icon name="external" size={16} /> Live demo
     </a>
   );
 }
@@ -37,6 +37,16 @@ function Stack({ p }) {
     <ul className="eco__stack" aria-label="Technologies">
       {p.stack.map((s) => (
         <li key={s}>{s}</li>
+      ))}
+    </ul>
+  );
+}
+
+function Features({ p }) {
+  return (
+    <ul className="eco__highlights" aria-label="Key features">
+      {p.features.map((f) => (
+        <li key={f}>{f}</li>
       ))}
     </ul>
   );
@@ -58,7 +68,13 @@ function Flagship({ p, still }) {
         <span className="eco__flag-tag">
           <i aria-hidden="true" /> Flagship build
         </span>
-        <span className="eco__flag-caption">Projection chamber · live hand tracking</span>
+        <ul className="eco__modes" aria-label="Modes (keys 1–5)">
+          {['3D shapes', 'Mouse', 'Air draw', 'AI shapes', '3D models'].map((m, i) => (
+            <li key={m}>
+              <b>{i + 1}</b> {m}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="eco__flag-body">
@@ -73,14 +89,11 @@ function Flagship({ p, still }) {
         </h3>
         <p className="eco__flag-tagline">{p.tagline}</p>
         <p className="eco__text">{p.summary}</p>
-        <ul className="eco__highlights">
-          {p.highlights.map((h) => (
-            <li key={h}>{h}</li>
-          ))}
-        </ul>
+        <Features p={p} />
         <Stack p={p} />
         <div className="eco__actions">
           <GithubButton p={p} />
+          <LiveButton p={p} />
         </div>
       </div>
     </motion.article>
@@ -99,7 +112,7 @@ function Panel({ p, still }) {
       aria-labelledby={`eco-${p.id}`}
     >
       <motion.div className="eco__panel-amb" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, ease }}>
-        <ProjectAmbient id={p.id} still={still} />
+        <ProjectAmbient id={p.id} still={still} fit="meet" />
       </motion.div>
       <div className="eco__panel-body">
         <div className="eco__flag-meta">
@@ -111,6 +124,7 @@ function Panel({ p, still }) {
           {p.alias && <small> · {p.alias}</small>}
         </h3>
         <p className="eco__text">{p.summary}</p>
+        <Features p={p} />
         <Stack p={p} />
         <div className="eco__actions">
           <GithubButton p={p} />
