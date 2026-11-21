@@ -45,8 +45,11 @@
 .sig__word-id {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.2em;
   fill: #f4f0e8;
+}
+.sig__n.is-dust {
+  fill: #b5bdc9;
 }
 .sig__ray {
   fill: none;

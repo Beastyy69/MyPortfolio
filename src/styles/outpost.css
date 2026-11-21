@@ -24,6 +24,7 @@
 }
 .out__map-svg {
   display: block;
+  overflow: hidden;
   width: 100%;
   height: auto;
   border-radius: 4px;
@@ -42,8 +43,34 @@
   transition: opacity 0.3s, stroke-width 0.3s;
 }
 .out__route.is-on {
-  opacity: 1;
+  opacity: 1 !important;
   stroke-width: 4;
+  animation: out-march 1.1s linear infinite;
+}
+@keyframes out-march {
+  to {
+    stroke-dashoffset: -19;
+  }
+}
+.out__river-flow {
+  animation: out-river 6s linear infinite;
+}
+@keyframes out-river {
+  to {
+    stroke-dashoffset: -56;
+  }
+}
+.out__viewport {
+  overflow: hidden;
+  border-radius: 4px;
+}
+.out__cam {
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.out__place.is-active .out__banner path {
+  stroke: #9a7224;
+  stroke-width: 3;
 }
 .out__place {
   cursor: pointer;
@@ -392,6 +419,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .out__route.is-on,
+  .out__river-flow {
+    animation: none;
+  }
   .out__lift,
   .out__chip,
   .out__btn,

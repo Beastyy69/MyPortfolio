@@ -402,7 +402,8 @@
     grid-template-columns: 1fr;
   }
   .eco__flag-stage {
-    min-height: 320px;
+    min-height: 0;
+    aspect-ratio: 3 / 2;
     border-right: 0;
     border-bottom: 1px solid rgba(167, 185, 163, 0.14);
   }
@@ -418,7 +419,7 @@
 }
 @media (max-width: 560px) {
   .eco__flag-stage {
-    min-height: 280px;
+    aspect-ratio: 4 / 3.4;
   }
   .eco__modes {
     left: 12px;

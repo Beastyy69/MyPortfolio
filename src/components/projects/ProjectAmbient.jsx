@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion, useAnimationFrame } from 'framer-motion';
 
 /* ─────────────────────────────────────────────────────────────
@@ -14,62 +14,165 @@ const BRASS = '#b89b68';
 const IVORY = '#f4f0e8';
 const loop = (duration, delay = 0) => ({ duration, delay, repeat: Infinity, ease: 'easeInOut' });
 
-/* Hologram With AI — the app's own view: a rotating 3D wireframe model, a
-   MediaPipe hand skeleton inside a tracking box. (The five modes are shown
-   as chips by the flagship panel.) */
-const CUBE = [-1, 1].flatMap((x) => [-1, 1].flatMap((y) => [-1, 1].map((z) => [x, y, z])));
-const CUBE_EDGES = [];
-CUBE.forEach((a, i) => CUBE.forEach((b, j) => j > i && a.filter((v, k) => v !== b[k]).length === 1 && CUBE_EDGES.push([i, j])));
+/* Hologram With AI — the app's real interaction, as a short loop:
+   a tracked hand moves left/right and forward/back; while the hand is open
+   the 3D model ROTATES with it and follows its position; a thumb‑index
+   PINCH switches to SCALE, so moving the hand forward/back resizes the
+   model; releasing the pinch selects the NEXT MODEL (cube → pyramid →
+   octahedron), like the app's 3D Models mode. Kalman‑style easing keeps
+   the object calm. */
+const poly = (verts) => {
+  const edges = [];
+  verts.forEach((a, i) =>
+    verts.forEach((b, j) => {
+      if (j <= i) return;
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+      edges.push([i, j, d]);
+    }),
+  );
+  const min = Math.min(...edges.map((e) => e[2]));
+  return { verts, edges: edges.filter((e) => e[2] < min * 1.05).map(([i, j]) => [i, j]) };
+};
+const MODELS = [
+  { name: 'CUBE', ...poly([-1, 1].flatMap((x) => [-1, 1].flatMap((y) => [-1, 1].map((z) => [x, y, z])))) },
+  {
+    name: 'PYRAMID',
+    verts: [[-1, 0.8, -1], [1, 0.8, -1], [1, 0.8, 1], [-1, 0.8, 1], [0, -1.2, 0]],
+    edges: [[0, 1], [1, 2], [2, 3], [3, 0], [0, 4], [1, 4], [2, 4], [3, 4]],
+  },
+  { name: 'OCTAHEDRON', ...poly([[1.3, 0, 0], [-1.3, 0, 0], [0, 1.3, 0], [0, -1.3, 0], [0, 0, 1.3], [0, 0, -1.3]]) },
+];
 const HAND = [
-  [0, 0], [-14, -10], [-24, -22], [-30, -34], [-34, -44], // thumb
-  [-10, -34], [-12, -52], [-13, -64], [-14, -74], // index
+  [0, 0], [-14, -10], [-24, -22], [-30, -34], [-34, -44], // thumb (tip 4)
+  [-10, -34], [-12, -52], [-13, -64], [-14, -74], // index (tip 8)
   [0, -36], [0, -56], [0, -69], [0, -80], // middle
   [10, -34], [12, -52], [13, -63], [14, -72], // ring
   [19, -28], [23, -42], [25, -52], [27, -60], // pinky
 ];
 const HAND_BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [0, 17], [17, 18], [18, 19], [19, 20]];
+const CYCLE = 12; // seconds per model
+const smooth = (x) => x * x * (3 - 2 * x);
+const win = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
+
+function holoState(sec) {
+  const c = sec % CYCLE;
+  const model = Math.floor(sec / CYCLE) % MODELS.length;
+  const sway = Math.sin((sec / 6) * Math.PI * 2); // left / right
+  const depth = Math.sin((sec / 4) * Math.PI * 2); // forward / back
+  const pinch = smooth(win(c, 5.4, 6.1)) * (1 - smooth(win(c, 9.8, 10.4))); // 0 open → 1 pinched
+  const swap = smooth(win(c, 10.6, 11.4)); // fade to the next model
+  return { c, model, sway, depth, pinch, swap };
+}
 
 function Hologram({ still }) {
-  const [a, setA] = useState(0.6);
-  useAnimationFrame((t) => {
-    if (!still) setA(t / 2600);
+  const [sec, setSec] = useState(1.5);
+  const ref = useRef({ angle: 0.6, scale: 1, shift: 0 });
+  useAnimationFrame((t, delta) => {
+    if (still) return;
+    const s = t / 1000;
+    const st = holoState(s);
+    const k = ref.current;
+    const dt = Math.min(0.05, delta / 1000);
+    // rotate mode: the model turns with the hand; scale mode: it resizes with depth
+    const rotating = st.pinch < 0.5;
+    const targetAngle = k.angle + (rotating ? 0.9 * Math.cos((s / 6) * Math.PI * 2) * dt * 2.2 + dt * 0.25 : dt * 0.08);
+    k.angle = targetAngle;
+    const targetScale = 1 + st.pinch * 0.24 * st.depth;
+    k.scale += (targetScale - k.scale) * Math.min(1, dt * 6); // Kalman‑like easing
+    const targetShift = rotating ? st.sway * 26 : k.shift;
+    k.shift += (targetShift - k.shift) * Math.min(1, dt * 4);
+    setSec(s);
   });
-  const pts = CUBE.map(([x, y, z]) => {
-    const cx = x * Math.cos(a) - z * Math.sin(a);
-    const cz = x * Math.sin(a) + z * Math.cos(a);
-    const cy = y * Math.cos(0.45) - cz * Math.sin(0.45);
-    return [300 + cx * 48, 150 + cy * 48];
+
+  const st = holoState(sec);
+  const { angle, scale, shift } = ref.current;
+  const project = (m) =>
+    m.verts.map(([x, y, z]) => {
+      const cx = x * Math.cos(angle) - z * Math.sin(angle);
+      const cz = x * Math.sin(angle) + z * Math.cos(angle);
+      const cy = y * Math.cos(0.42) - cz * Math.sin(0.42);
+      return [250 + shift + cx * 46 * scale, 168 + cy * 46 * scale];
+    });
+  const cur = MODELS[st.model];
+  const next = MODELS[(st.model + 1) % MODELS.length];
+  const shapes = [
+    { m: cur, o: 1 - st.swap },
+    { m: next, o: st.swap },
+  ].filter((x) => x.o > 0.01);
+
+  // the hand: moves left/right, forward/back (scale), and pinches
+  const hx = 420 + st.sway * 30;
+  const hy = 268 - st.depth * 6;
+  const hs = 1 + st.depth * 0.08;
+  const pinchPt = [(HAND[4][0] + HAND[8][0]) / 2 + 4, (HAND[4][1] + HAND[8][1]) / 2 - 6];
+  const hand = HAND.map(([x, y], i) => {
+    if (i === 4 || i === 3 || i === 8 || i === 7) {
+      const w = i === 4 || i === 8 ? 1 : 0.55;
+      return [lerpN(x, pinchPt[0], st.pinch * w), lerpN(y, pinchPt[1], st.pinch * w)];
+    }
+    return [x, y];
   });
+  const mode = st.pinch > 0.5 ? 'PINCH · SCALE' : st.c > 10.2 ? 'NEXT MODEL' : 'OPEN HAND · ROTATE';
+
   return (
     <>
       <defs>
         <linearGradient id="amb-cone" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0" stopColor={IVORY} stopOpacity="0.16" />
+          <stop offset="0" stopColor={IVORY} stopOpacity="0.15" />
           <stop offset="1" stopColor={IVORY} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d="M262 318 L170 50 L430 50 L338 318 Z" fill="url(#amb-cone)" />
-      <ellipse cx="300" cy="322" rx="70" ry="12" fill="none" stroke={BRASS} strokeWidth="1.4" />
-      <ellipse cx="300" cy="322" rx="40" ry="6" fill={BRASS} opacity="0.35" />
-      {CUBE_EDGES.map(([i, j], k) => (
-        <line key={k} x1={pts[i][0]} y1={pts[i][1]} x2={pts[j][0]} y2={pts[j][1]} stroke={IVORY} strokeOpacity="0.7" strokeWidth="1.3" />
-      ))}
-      {pts.map(([x, y], k) => (
-        <circle key={`v${k}`} cx={x} cy={y} r="2.6" fill={BRASS} />
-      ))}
-      <motion.g animate={still ? undefined : { x: [0, 10, 0], y: [0, -6, 0] }} transition={loop(6)} transform="translate(470 270)">
+      {/* projector and beam, breathing softly */}
+      <motion.path d="M218 318 L140 50 L360 50 L282 318 Z" fill="url(#amb-cone)" animate={still ? undefined : { opacity: [0.75, 1, 0.75] }} transition={loop(4)} />
+      <ellipse cx="250" cy="322" rx="64" ry="11" fill="none" stroke={BRASS} strokeWidth="1.4" />
+      <ellipse cx="250" cy="322" rx="36" ry="5.5" fill={BRASS} opacity="0.35" />
+
+      {/* the controlled model */}
+      {shapes.map(({ m, o }) => {
+        const pts = project(m);
+        return (
+          <g key={m.name} opacity={o}>
+            {m.edges.map(([i, j], k) => (
+              <line key={k} x1={pts[i][0]} y1={pts[i][1]} x2={pts[j][0]} y2={pts[j][1]} stroke={IVORY} strokeOpacity="0.75" strokeWidth="1.3" />
+            ))}
+            {pts.map(([x, y], k) => (
+              <circle key={`v${k}`} cx={x} cy={y} r="2.6" fill={BRASS} />
+            ))}
+          </g>
+        );
+      })}
+
+      {/* control link: hand → model */}
+      <path d={`M${hx - 40} ${hy - 52} Q${(hx + 250 + shift) / 2} ${120} ${282 + shift} ${150}`} fill="none" stroke={BRASS} strokeOpacity="0.45" strokeWidth="1" strokeDasharray="3 5" />
+
+      {/* tracked hand inside its detection box */}
+      <g transform={`translate(${hx.toFixed(1)} ${hy.toFixed(1)}) scale(${hs.toFixed(3)})`}>
         {HAND_BONES.map(([i, j], k) => (
-          <line key={k} x1={HAND[i][0]} y1={HAND[i][1]} x2={HAND[j][0]} y2={HAND[j][1]} stroke={SAGE} strokeWidth="1.3" />
+          <line key={k} x1={hand[i][0]} y1={hand[i][1]} x2={hand[j][0]} y2={hand[j][1]} stroke={SAGE} strokeWidth="1.3" />
         ))}
-        {HAND.map(([x, y], k) => (
+        {hand.map(([x, y], k) => (
           <circle key={k} cx={x} cy={y} r={k % 4 === 0 ? 2.8 : 2} fill={k % 4 === 0 ? BRASS : IVORY} />
         ))}
-        <path d="M-46 -92 h12 M-46 -92 v12 M38 -92 h-12 M38 -92 v12 M-46 14 h12 M-46 14 v-12 M38 14 h-12 M38 14 v-12" stroke={BRASS} strokeWidth="1.3" fill="none" />
-      </motion.g>
-      <motion.line x1="130" x2="470" y1="0" y2="0" stroke={SAGE_FAINT} strokeWidth="1" animate={still ? undefined : { y1: [70, 320, 70], y2: [70, 320, 70] }} transition={loop(7)} />
+        {st.pinch > 0.05 && (
+          <>
+            <line x1={hand[4][0]} y1={hand[4][1]} x2={hand[8][0]} y2={hand[8][1]} stroke={BRASS} strokeWidth="1.4" />
+            <circle cx={pinchPt[0]} cy={pinchPt[1]} r={4 + 6 * (1 - st.pinch)} fill="none" stroke={BRASS} strokeOpacity={st.pinch} />
+          </>
+        )}
+        <path d="M-50 -96 h12 M-50 -96 v12 M42 -96 h-12 M42 -96 v12 M-50 16 h12 M-50 16 v-12 M42 16 h-12 M42 16 v-12" stroke={BRASS} strokeWidth="1.3" fill="none" />
+      </g>
+
+      {/* status, like the app's on‑screen HUD */}
+      <text x="372" y="128" fill={st.pinch > 0.5 ? BRASS : IVORY} opacity="0.75" fontSize="10" fontFamily="var(--font-mono)" letterSpacing="1.5">
+        {mode}
+      </text>
+      <text x="372" y="112" fill={IVORY} opacity="0.4" fontSize="9" fontFamily="var(--font-mono)" letterSpacing="1.5">
+        MODEL · {(st.swap > 0.5 ? next : cur).name}
+      </text>
     </>
   );
 }
+const lerpN = (a, b, t) => a + (b - a) * t;
 
 /* Mail Mind Pro — the inbox dashboard: emails arrive, Gemini tags each one
    with intent, urgency and sentiment and writes a summary + reply options. */
@@ -155,7 +258,9 @@ function Radar({ still }) {
         <circle key={r} cx="300" cy="200" r={r} fill="none" stroke={SAGE_FAINT} strokeWidth="1" />
       ))}
       <path d="M150 200 H450 M300 50 V350" stroke={SAGE_FAINT} strokeWidth="1" />
-      <motion.g style={{ originX: '300px', originY: '200px' }} animate={still ? undefined : { rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}>
+      <motion.g animate={still ? undefined : { rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}>
+        {/* invisible circle centred on the radar, so the sweep turns around it */}
+        <circle cx="300" cy="200" r="152" fill="none" stroke="none" />
         <path d="M300 200 L450 200 A150 150 0 0 0 406 94 Z" fill={IVORY} opacity="0.07" />
         <line x1="300" y1="200" x2="450" y2="200" stroke={IVORY} strokeOpacity="0.5" strokeWidth="1.2" />
       </motion.g>
@@ -210,7 +315,10 @@ function Roast({ still }) {
       ))}
       <path d="M440 330 A70 70 0 0 1 580 330" fill="none" stroke={SAGE_FAINT} strokeWidth="6" />
       <path d="M440 330 A70 70 0 0 1 510 260" fill="none" stroke={BRASS} strokeOpacity="0.6" strokeWidth="6" />
-      <motion.line x1="510" y1="330" x2="510" y2="276" stroke={IVORY} strokeWidth="2" style={{ originX: '510px', originY: '330px' }} animate={still ? { rotate: -20 } : { rotate: [-60, 30, -10, 50, -60] }} transition={loop(7)} />
+      <motion.g animate={still ? { rotate: -20 } : { rotate: [-60, 30, -10, 50, -60] }} transition={loop(7)}>
+        <circle cx="510" cy="330" r="56" fill="none" stroke="none" />
+        <line x1="510" y1="330" x2="510" y2="276" stroke={IVORY} strokeWidth="2" />
+      </motion.g>
       <circle cx="510" cy="330" r="5" fill={BRASS} />
     </>
   );

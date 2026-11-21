@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useMode } from '../../context/ModeContext.jsx';
 import { githubUrl, projects } from '../../data/projects.js';
 import useRepoStats from '../../hooks/useRepoStats.js';
@@ -27,6 +27,7 @@ const SPOTS = {
   cinesense: { x: 420, y: 640, s: 0.8 },
   roastme: { x: 170, y: 520, s: 0.82 },
 };
+const CAM_ZOOM = 1.75;
 const code = (p) => `M-${String(projects.indexOf(p) + 1).padStart(2, '0')}`;
 
 function route(to) {
@@ -37,23 +38,39 @@ function route(to) {
   return `M${a.x} ${a.y - 6} Q${mx} ${my} ${b.x} ${b.y - 6}`;
 }
 
-function Terrain() {
+const RIVER = 'M-20 300 C120 280 170 380 320 360 S520 460 560 560 S620 760 640 800';
+const CLOUDS = [
+  { x: 180, y: 70, s: 1, d: 90 },
+  { x: 760, y: 48, s: 0.8, d: 120 },
+  { x: 980, y: 250, s: 0.65, d: 100 },
+];
+
+/* far layers move least with the pointer, near layers most */
+function Terrain({ live, far, mid }) {
   return (
     <g aria-hidden="true">
-      {/* river */}
-      <path d="M-20 300 C120 280 170 380 320 360 S520 460 560 560 S620 760 640 800" fill="none" stroke="#8c9a8c" strokeOpacity="0.5" strokeWidth="18" strokeLinecap="round" />
-      <path d="M-20 300 C120 280 170 380 320 360 S520 460 560 560 S620 760 640 800" fill="none" stroke={C.ink} strokeOpacity="0.25" strokeWidth="1.4" strokeDasharray="2 8" />
-      {/* mountains */}
-      {[[420, 120], [480, 100], [540, 125], [700, 110], [760, 90]].map(([x, y], i) => (
-        <g key={`m${i}`} stroke={C.ink} strokeOpacity="0.55" strokeWidth="1.8" strokeLinejoin="round">
-          <path d={`M${x - 40} ${y + 30} L${x} ${y - 24} L${x + 40} ${y + 30} Z`} fill="#cbbb95" />
-          <path d={`M${x} ${y - 24} L${x - 9} ${y - 10} L${x} ${y - 13} L${x + 8} ${y - 9} Z`} fill="#f1e6cc" />
-        </g>
-      ))}
-      {/* forests */}
-      {[[320, 470], [345, 486], [300, 495], [880, 380], [905, 395], [860, 400], [1100, 300], [1125, 318], [140, 120], [165, 135], [690, 520], [1060, 660]].map(([x, y], i) => (
-        <path key={`t${i}`} d={`M${x} ${y} l-10 18 h20 z`} fill={i % 2 ? C.olive : C.oliveDk} stroke={C.ink} strokeOpacity="0.6" strokeWidth="1.4" strokeLinejoin="round" />
-      ))}
+      {/* river, with a slow flowing texture */}
+      <path d={RIVER} fill="none" stroke="#8c9a8c" strokeOpacity="0.5" strokeWidth="18" strokeLinecap="round" />
+      <path d={RIVER} fill="none" stroke="#f3ead6" strokeOpacity="0.45" strokeWidth="2" strokeDasharray="6 22" strokeLinecap="round" className={live ? 'out__river-flow' : ''} />
+      <path d={RIVER} fill="none" stroke={C.ink} strokeOpacity="0.22" strokeWidth="1.4" strokeDasharray="2 8" />
+      {/* mountains — the far layer */}
+      <motion.g style={far}>
+        {[[420, 120], [480, 100], [540, 125], [700, 110], [760, 90]].map(([x, y], i) => (
+          <g key={`m${i}`} stroke={C.ink} strokeOpacity="0.55" strokeWidth="1.8" strokeLinejoin="round">
+            <path d={`M${x - 40} ${y + 30} L${x} ${y - 24} L${x + 40} ${y + 30} Z`} fill="#cbbb95" />
+            <path d={`M${x} ${y - 24} L${x - 9} ${y - 10} L${x} ${y - 13} L${x + 8} ${y - 9} Z`} fill="#f1e6cc" />
+          </g>
+        ))}
+      </motion.g>
+      {/* forests — the middle layer, swaying a little */}
+      <motion.g style={mid}>
+        {[[320, 470], [345, 486], [300, 495], [880, 380], [905, 395], [860, 400], [1100, 300], [1125, 318], [140, 120], [165, 135], [690, 520], [1060, 660]].map(([x, y], i) => (
+          <motion.g key={`t${i}`} animate={live ? { rotate: [0, i % 2 ? 2 : -2, 0] } : undefined} transition={{ duration: 4 + (i % 4), repeat: Infinity, ease: 'easeInOut' }}>
+            <circle cx={x} cy={y + 18} r="22" fill="none" stroke="none" />
+            <path d={`M${x} ${y} l-10 18 h20 z`} fill={i % 2 ? C.olive : C.oliveDk} stroke={C.ink} strokeOpacity="0.6" strokeWidth="1.4" strokeLinejoin="round" />
+          </motion.g>
+        ))}
+      </motion.g>
       {/* compass rose */}
       <g transform="translate(1110 100)" stroke={C.ink} strokeWidth="1.6" strokeOpacity="0.7">
         <circle r="30" fill="none" />
@@ -71,14 +88,29 @@ function Terrain() {
   );
 }
 
-function Place({ p, onOpen, live, hovered, setHovered }) {
+/* clouds drift across the map, above the terrain */
+function Clouds({ live }) {
+  return (
+    <g aria-hidden="true" pointerEvents="none">
+      {CLOUDS.map((c, i) => (
+        <motion.g key={i} initial={{ x: 0 }} animate={live ? { x: [0, 1300 - c.x, -c.x - 200, 0] } : undefined} transition={{ duration: c.d, repeat: Infinity, ease: 'linear', times: [0, 0.6, 0.6001, 1] }}>
+          <g transform={`translate(${c.x} ${c.y}) scale(${c.s})`} fill="#f6efdf" fillOpacity="0.85" stroke={C.ink} strokeOpacity="0.25" strokeWidth="1.4">
+            <path d="M0 20 q14 -18 34 -6 q14 -14 32 2 q18 -2 20 14 z" />
+          </g>
+        </motion.g>
+      ))}
+    </g>
+  );
+}
+
+function Place({ p, onOpen, live, hovered, active, setHovered }) {
   const spot = SPOTS[p.id];
   const flag = p.featured;
   const open = (e) => onOpen(p.id, e.currentTarget);
   return (
     <g
       transform={`translate(${spot.x} ${spot.y})`}
-      className={`out__place ${flag ? 'is-flag' : ''} ${hovered ? 'is-hover' : ''}`}
+      className={`out__place ${flag ? 'is-flag' : ''} ${hovered ? 'is-hover' : ''} ${active ? 'is-active' : ''}`}
       role="button"
       tabIndex={0}
       aria-label={`${p.place}: ${p.title}${flag ? ' — flagship mission' : ''}. Open mission.`}
@@ -91,6 +123,10 @@ function Place({ p, onOpen, live, hovered, setHovered }) {
       data-cursor-retro="Enter"
     >
       <ellipse cx="0" cy="4" rx={78 * spot.s} ry={14 * spot.s} fill={C.ink} fillOpacity="0.16" />
+      {/* calm active state: a muted brass ring under the place */}
+      {active && (
+        <motion.ellipse cx="0" cy="4" rx={92 * spot.s} ry={20 * spot.s} fill="none" stroke={C.gold} strokeWidth="2.5" initial={{ opacity: 0 }} animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 2.4, repeat: Infinity }} />
+      )}
       <g className="out__lift">
         <g transform={`scale(${spot.s})`}>
           <Landmark id={p.id} live={live} />
@@ -229,21 +265,62 @@ export default function MissionOutpost() {
   const [origin, setOrigin] = useState(null);
   const returnFocus = useRef(null);
 
-  const open = useCallback((id, el) => {
-    returnFocus.current = el ?? document.activeElement;
-    const r = el?.getBoundingClientRect?.();
-    setOrigin(r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null);
-    setOpenId(id);
-  }, []);
+  const [focus, setFocus] = useState(null); // where the camera is looking
+  const timer = useRef(0);
+  const mapRef = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  // pointer parallax: far mountains drift least, forests more, places most
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 50, damping: 16 });
+  const sy = useSpring(my, { stiffness: 50, damping: 16 });
+  const far = { x: useTransform(sx, (v) => v * -10), y: useTransform(sy, (v) => v * -6) };
+  const mid = { x: useTransform(sx, (v) => v * -18), y: useTransform(sy, (v) => v * -10) };
+  const near = { x: useTransform(sx, (v) => v * -26), y: useTransform(sy, (v) => v * -14) };
+  const onMove = (e) => {
+    if (reduceMotion || focus) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  };
+  const resetMove = () => {
+    mx.set(0);
+    my.set(0);
+  };
+
+  // click: the camera pans and zooms toward the place, then the mission opens
+  const open = useCallback(
+    (id, el) => {
+      returnFocus.current = el ?? document.activeElement;
+      clearTimeout(timer.current);
+      const r = mapRef.current?.getBoundingClientRect();
+      setOrigin(r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null);
+      if (reduceMotion) {
+        setFocus(id);
+        setOpenId(id);
+        return;
+      }
+      mx.set(0);
+      my.set(0);
+      setFocus(id);
+      timer.current = setTimeout(() => setOpenId(id), 680);
+    },
+    [reduceMotion, mx, my],
+  );
   const close = useCallback(() => {
+    clearTimeout(timer.current);
     setOpenId(null);
+    setFocus(null);
     requestAnimationFrame(() => returnFocus.current?.focus?.());
   }, []);
   const step = useCallback((d) => {
     setOrigin(null);
     setOpenId((cur) => {
       const i = projects.findIndex((p) => p.id === cur);
-      return projects[(i + d + projects.length) % projects.length].id;
+      const next = projects[(i + d + projects.length) % projects.length].id;
+      setFocus(next);
+      return next;
     });
   }, []);
 
@@ -252,27 +329,57 @@ export default function MissionOutpost() {
 
   return (
     <div className="out">
-      <div className="out__map">
-        <svg viewBox="0 0 1200 720" className="out__map-svg" aria-label="Project territory map. Each place is a project; select one to open its mission.">
-          <Terrain />
-          {/* routes from the observatory to every outpost */}
-          {projects
-            .filter((p) => !p.featured)
-            .map((p, i) => (
-              <motion.path
-                key={p.id}
-                d={route(p.id)}
-                className={`out__route ${hovered === p.id ? 'is-on' : ''}`}
-                initial={{ pathLength: reduceMotion ? 1 : 0 }}
-                whileInView={{ pathLength: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.2, delay: 0.2 + i * 0.12, ease }}
-              />
-            ))}
-          {ordered.map((p) => (
-            <Place key={p.id} p={p} onOpen={open} live={!reduceMotion} hovered={hovered === p.id} setHovered={setHovered} />
-          ))}
-        </svg>
+      <div className="out__map" onPointerMove={onMove} onPointerLeave={resetMove}>
+        <div className="out__viewport" ref={mapRef}>
+          <motion.div
+            className="out__cam"
+            animate={focus && !reduceMotion ? { scale: CAM_ZOOM, x: `${(0.5 - SPOTS[focus].x / 1200) * CAM_ZOOM * 100}%`, y: `${(0.5 - (SPOTS[focus].y - 40) / 720) * CAM_ZOOM * 100}%` } : { scale: 1, x: '0%', y: '0%' }}
+            transition={{ duration: 0.75, ease: [0.65, 0, 0.35, 1] }}
+          >
+            <svg viewBox="0 0 1200 720" className="out__map-svg" aria-label="Project territory map. Each place is a project; select one to open its mission.">
+              <Terrain live={!reduceMotion} far={far} mid={mid} />
+              <motion.g style={near}>
+                {/* routes from the observatory to every outpost; the hovered / active
+                    route becomes more visible and its dashes march */}
+                {projects
+                  .filter((p) => !p.featured)
+                  .map((p, i) => {
+                    const lit = [hovered, focus].some((id) => id === p.id || id === 'hologram');
+                    return (
+                      <g key={p.id}>
+                        <motion.path
+                          d={route(p.id)}
+                          className={`out__route ${lit ? 'is-on' : ''}`}
+                          initial={{ opacity: reduceMotion ? 0.7 : 0 }}
+                          whileInView={{ opacity: 0.7 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.8, delay: 0.2 + i * 0.1 }}
+                        />
+                        {lit && !reduceMotion && (
+                          <circle r="5" fill={C.gold} stroke={C.ink} strokeWidth="1.5">
+                            <animateMotion dur="2.6s" repeatCount="indefinite" path={route(p.id)} keyPoints="1;0" keyTimes="0;1" calcMode="linear" />
+                          </circle>
+                        )}
+                      </g>
+                    );
+                  })}
+                {/* now and then an envelope travels from the relay station to the observatory */}
+                {!reduceMotion && (
+                  <g>
+                    <rect x="-9" y="-6" width="18" height="12" fill={C.paper} stroke={C.ink} strokeWidth="1.5" />
+                    <path d="M-9 -6 L0 1 L9 -6" fill="none" stroke={C.ink} strokeWidth="1.5" />
+                    <animateMotion dur="11s" repeatCount="indefinite" path={route('mailmind')} keyPoints="1;1;0;0" keyTimes="0;0.3;0.7;1" calcMode="linear" />
+                    <animate attributeName="opacity" dur="11s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.28;0.33;0.66;0.71;1" />
+                  </g>
+                )}
+                {ordered.map((p) => (
+                  <Place key={p.id} p={p} onOpen={open} live={!reduceMotion} hovered={hovered === p.id} active={focus === p.id} setHovered={setHovered} />
+                ))}
+              </motion.g>
+              <Clouds live={!reduceMotion} />
+            </svg>
+          </motion.div>
+        </div>
       </div>
 
       {/* roster: every mission as a plain list — for phones, keyboards and quick scanning */}

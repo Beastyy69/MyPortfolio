@@ -10,13 +10,15 @@ import { profile } from '../../data/profile.js';
    the HS is drawn in a group translated to the exact screen centre, so
    the composition stays centred on any screen.
 
-   0–12%    24 small nodes appear scattered across the screen (ivory
-            circles, brass dots, sage squares) with a few line fragments
-   5–44%    identity words appear softly near a few nodes, then fade
-   14–42%   the nodes discover their connections (the same graph the
-            letters will use, stretched across the screen)
-   36–64%   convergence: nodes travel on calm curves to the centre and
-            land on the HS skeleton; the edges of the screen empty out
+   0–12%    12 named identity nodes (AIML Developer, Python Engineer,
+            Backend Builder, Web Developer, Coder, Gamer, Biker, Roaster,
+            Creator, Builder, Problem Solver, Learner) appear across the
+            screen, each with its own collision-aware label; 12 tiny
+            unnamed particles are clearly smaller background texture
+   14–40%   related identities connect (Python Engineer ↔ Backend Builder…)
+   36–64%   convergence: every node travels on a calm curve to its anchor
+            on the HS; each label follows its node and dissolves into a
+            small fragment on the way
    60–68%   the precise letter skeleton draws
    67–82%   the skeleton thickens (mask) and merges into solid,
             variable-width letters: H pillars, bridge, then the S
@@ -132,13 +134,20 @@ const ANCHORS = [
   [-128, -6], [-94, 0], [-60, 6], //                    8–10  bridge (joins + middle)
   ...S_PTS, //                                             11–23 the S
 ];
-const EDGES = [
-  [0, 1], [1, 2], [2, 3], [4, 5], [5, 6], [6, 7], [1, 8], [8, 9], [9, 10], [10, 6],
-  ...S_PTS.slice(1).map((_, i) => [11 + i, 12 + i]),
-  [7, 23], // the S tail reaches back to the H — one signature
+/* 12 named identity nodes form the HS's key points (corners, joins, curve
+   stations); 12 tiny unnamed particles fill the remaining anchors. */
+const MAJOR = [0, 3, 4, 7, 8, 10, 11, 13, 15, 17, 19, 23];
+const MINOR = ANCHORS.map((_, i) => i).filter((i) => !MAJOR.includes(i));
+// placed around the screen in this order, so related identities sit near each other
+const IDENTITIES = ['AIML Developer', 'Python Engineer', 'Backend Builder', 'Web Developer', 'Coder', 'Gamer', 'Biker', 'Roaster', 'Creator', 'Builder', 'Problem Solver', 'Learner'];
+// meaningful connections only (indices into IDENTITIES)
+const RELATIONS = [
+  [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], // AIML → Python → Backend → Web → Coder → Gamer → Biker
+  [7, 8], [8, 9], [9, 10], [10, 11], [11, 0], // Roaster → Creator → Builder → Problem Solver → Learner → AIML
+  [4, 10], // Coder ↔ Problem Solver
 ];
-const STYLE = ANCHORS.map((_, i) => (i % 5 === 1 ? 'brass' : i % 5 === 3 ? 'sage' : 'ivory'));
-const WORD_AT = { 2: 'CODER', 6: 'GAMER', 13: 'BIKER', 17: 'ROASTER', 20: 'BUILDER', 9: 'AIML' };
+const ID_STYLE = IDENTITIES.map((_, i) => (i % 3 === 1 ? 'brass' : i % 3 === 2 ? 'sage' : 'ivory'));
+const LABEL_CW = 8.6; // ≈ px per character at 11px mono with 0.2em tracking
 
 function useViewport() {
   const [v, setV] = useState(() => ({ W: window.innerWidth, H: window.innerHeight }));
@@ -164,45 +173,95 @@ function useGeometry(W, H) {
     const toScreen = ([x, y]) => [cx + x * s, cy + y * s];
     const targets = ANCHORS.map(toScreen);
 
-    // scattered starts: a jittered grid over the whole screen, keeping the centre clear
-    const cols = W < 700 ? 4 : 6;
-    const rows = Math.ceil(ANCHORS.length / cols);
-    const cells = [];
-    for (let r = 0; r < rows; r++)
-      for (let c = 0; c < cols; c++) {
-        const i = r * cols + c;
-        let x = W * (0.07 + (0.86 * (c + 0.2 + 0.6 * hash(i + 1))) / cols);
-        let y = H * (0.09 + (0.82 * (r + 0.2 + 0.6 * hash(i + 41))) / rows);
-        const dx = x - W / 2;
-        const dy = y - H / 2;
-        const clear = Math.hypot(dx / W, dy / H);
-        if (clear < 0.2) {
-          const k = 0.2 / (clear || 0.01);
-          x = W / 2 + dx * k;
-          y = H / 2 + dy * k;
-        }
-        cells.push([x, y]);
-      }
-    // pair starts to anchors by angle around the centre, so paths converge calmly
     const ang = ([x, y]) => Math.atan2(y - H / 2, x - W / 2);
-    const startOrder = cells.slice(0, ANCHORS.length).map((p, i) => [i, ang(p)]).sort((a, b) => a[1] - b[1]);
-    const anchorOrder = targets.map((p, i) => [i, ang(p)]).sort((a, b) => a[1] - b[1]);
-    const start = [];
-    anchorOrder.forEach(([ai], k) => (start[ai] = cells[startOrder[k][0]]));
+    const top = Math.max(64, H * 0.11);
+    const clampPt = ([x, y]) => [Math.min(W - 40, Math.max(40, x)), Math.min(H - 50, Math.max(top, y))];
 
-    const nodes = ANCHORS.map((_, i) => {
-      const a = start[i];
-      const b = targets[i];
+    // identity nodes: one per angular sector around the screen, at varied depths —
+    // scattered, not a ring
+    const idStart = IDENTITIES.map((_, i) => {
+      const a = ((-160 + i * 30 + (hash(i + 3) - 0.5) * 14) * Math.PI) / 180;
+      const r = 0.5 + 0.45 * hash(i + 29);
+      return clampPt([W / 2 + Math.cos(a) * W * 0.47 * r, H / 2 + Math.sin(a) * H * 0.45 * r]);
+    });
+    // tiny particles: a loose jittered grid, centre kept clear
+    const minorStart = MINOR.map((_, i) => {
+      let x = W * (0.06 + 0.88 * hash(i + 101));
+      let y = H * (0.12 + 0.8 * hash(i + 151));
+      const dx = x - W / 2;
+      const dy = y - H / 2;
+      const clear = Math.hypot(dx / W, dy / H);
+      if (clear < 0.22) {
+        const k = 0.22 / (clear || 0.01);
+        x = W / 2 + dx * k;
+        y = H / 2 + dy * k;
+      }
+      return clampPt([x, y]);
+    });
+
+    // pair each group with its anchors by angle, so paths converge without crossing
+    const pair = (starts, anchorIds) => {
+      const so = starts.map((pt, i) => [i, ang(pt)]).sort((a, b) => a[1] - b[1]);
+      const ao = anchorIds.map((ai) => [ai, ang(targets[ai])]).sort((a, b) => a[1] - b[1]);
+      const out = {};
+      ao.forEach(([ai], k) => (out[ai] = so[k][0]));
+      return out; // anchor → start index
+    };
+    const idFor = pair(idStart, MAJOR);
+    const minorFor = pair(minorStart, MINOR);
+
+    const nodes = ANCHORS.map((_, ai) => {
+      const major = MAJOR.includes(ai);
+      const idx = major ? idFor[ai] : minorFor[ai];
+      const a = major ? idStart[idx] : minorStart[idx];
+      const b = targets[ai];
       const dist = Math.hypot(b[0] - a[0], b[1] - a[1]);
       // a gentle, consistent swirl toward the centre
-      const ctrl = [(a[0] + b[0]) / 2 + ((-(b[1] - a[1])) / (dist || 1)) * dist * 0.22, (a[1] + b[1]) / 2 + ((b[0] - a[0]) / (dist || 1)) * dist * 0.22];
-      return { a, b, ctrl, dist, appear: 0.01 + hash(i + 7) * 0.08, drift: hash(i + 13) * Math.PI * 2 };
+      const ctrl = [(a[0] + b[0]) / 2 + (-(b[1] - a[1]) / (dist || 1)) * dist * 0.22, (a[1] + b[1]) / 2 + ((b[0] - a[0]) / (dist || 1)) * dist * 0.22];
+      return {
+        ai,
+        major,
+        id: major ? idx : null,
+        a,
+        b,
+        ctrl,
+        dist,
+        appear: major ? 0.01 + idx * 0.007 : 0.04 + hash(ai + 7) * 0.08,
+        drift: hash(ai + 13) * Math.PI * 2,
+      };
     });
     const maxD = Math.max(...nodes.map((n) => n.dist));
     nodes.forEach((n) => {
       // the farthest nodes leave first; everyone arrives by ~63%
-      n.go = 0.36 + (1 - n.dist / maxD) * 0.1 + hash(n.appear * 99) * 0.02;
+      n.go = 0.36 + (1 - n.dist / maxD) * 0.1 + hash(n.ai * 9.7) * 0.02;
       n.land = n.go + 0.15;
+    });
+    const byIdentity = [];
+    nodes.forEach((n) => n.major && (byIdentity[n.id] = n));
+
+    // collision-aware labels: try right, left, above, below; never overlap another
+    // label or node, never leave the viewport
+    const boxes = [];
+    const PAD = 7; // room for the gentle drift
+    const nodeBoxes = nodes.map((n) => [n.a[0] - 6, n.a[1] - 6, n.a[0] + 6, n.a[1] + 6]);
+    const hit = (b, list) => list.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+    const labels = IDENTITIES.map((text, i) => {
+      const n = byIdentity[i];
+      const w = text.length * LABEL_CW;
+      const [x, y] = n.a;
+      const tries = [
+        { dx: 12, dy: 4, anchor: 'start', box: [x + 10, y - 9, x + 12 + w, y + 7] },
+        { dx: -12, dy: 4, anchor: 'end', box: [x - 12 - w, y - 9, x - 10, y + 7] },
+        { dx: 0, dy: -13, anchor: 'middle', box: [x - w / 2, y - 26, x + w / 2, y - 9] },
+        { dx: 0, dy: 22, anchor: 'middle', box: [x - w / 2, y + 9, x + w / 2, y + 26] },
+      ];
+      const inView = (b) => b[0] >= 8 && b[2] <= W - 8 && b[1] >= top - 8 && b[3] <= H - 8;
+      const grow = (b) => [b[0] - PAD, b[1] - PAD / 2, b[2] + PAD, b[3] + PAD / 2];
+      const others = nodeBoxes.filter((_, k) => nodes[k] !== n);
+      let pick = tries.find((t) => inView(t.box) && !hit(grow(t.box), boxes) && !hit(t.box, others));
+      if (!pick) pick = tries.find((t) => inView(t.box)) ?? tries[0];
+      boxes.push(grow(pick.box));
+      return { text, ...pick };
     });
     const fragments = Array.from({ length: 6 }, (_, i) => {
       const x = W * (0.1 + 0.8 * hash(i + 71));
@@ -218,7 +277,7 @@ function useGeometry(W, H) {
       const k = Math.max(W, H) / (Math.hypot(dx, dy) || 1);
       return `M${x.toFixed(1)} ${y.toFixed(1)} L${(W / 2 + dx * k).toFixed(1)} ${(H / 2 + dy * k).toFixed(1)}`;
     });
-    return { s, cx, cy, nodes, fragments, rays };
+    return { s, cx, cy, nodes, fragments, rays, byIdentity, labels };
   }, [W, H]);
 }
 
@@ -251,14 +310,16 @@ function Film({ p, still }) {
         return o > 0 ? <line key={`f${i}`} x1={f.x - f.dx} y1={f.y - f.dy} x2={f.x + f.dx} y2={f.y + f.dy} className="sig__frag-line" style={{ opacity: o }} /> : null;
       })}
 
-      {/* connections discovered between the scattered parts, then pulled inward */}
-      {EDGES.map(([a, b], i) => {
-        const t = ease(seg(p, 0.14 + (i % 12) * 0.018, 0.24 + (i % 12) * 0.018));
-        const o = Math.min(shown[a], shown[b]) * (1 - seg(p, 0.62, 0.7));
+      {/* connections between related identities, then pulled inward */}
+      {RELATIONS.map(([ia, ib], i) => {
+        const A = g.byIdentity[ia];
+        const B = g.byIdentity[ib];
+        const t = ease(seg(p, 0.14 + i * 0.016, 0.26 + i * 0.016));
+        const o = Math.min(shown[A.ai], shown[B.ai]) * (1 - seg(p, 0.6, 0.68));
         if (t <= 0 || o <= 0) return null;
-        const A = pos[a];
-        const B = pos[b];
-        return <line key={`e${i}`} x1={A[0]} y1={A[1]} x2={A[0] + (B[0] - A[0]) * t} y2={A[1] + (B[1] - A[1]) * t} className="sig__edge" style={{ opacity: o }} />;
+        const pa = pos[A.ai];
+        const pb = pos[B.ai];
+        return <line key={`e${i}`} x1={pa[0]} y1={pa[1]} x2={pa[0] + (pb[0] - pa[0]) * t} y2={pa[1] + (pb[1] - pa[1]) * t} className="sig__edge" style={{ opacity: o }} />;
       })}
 
       {/* exit: a few paths reach outward and become the hero's environment */}
@@ -355,27 +416,37 @@ function Film({ p, still }) {
         </motion.g>
       </g>
 
-      {/* nodes and identity words (screen space) */}
+      {/* nodes (screen space): named identities, and tiny unnamed particles */}
       {pos.map(([x, y, k, i]) => {
+        const n = g.nodes[i];
         const o = shown[i] * nodeFade;
         if (o <= 0) return null;
-        const st = STYLE[i];
-        const r = st === 'ivory' ? 3.6 : 2.8;
+        if (!n.major) return <circle key={`n${i}`} cx={x} cy={y} r="1.6" className="sig__n is-dust" style={{ opacity: o * 0.5 }} />;
+        const st = ID_STYLE[n.id];
         return st === 'sage' ? (
-          <rect key={`n${i}`} x={x - 3} y={y - 3} width="6" height="6" className="sig__n is-sage" style={{ opacity: o }} />
+          <rect key={`n${i}`} x={x - 3.5} y={y - 3.5} width="7" height="7" className="sig__n is-sage" style={{ opacity: o }} />
         ) : (
-          <circle key={`n${i}`} cx={x} cy={y} r={r * lerp(1, 1.15, k)} className={`sig__n ${st === 'brass' ? 'is-brass' : ''}`} style={{ opacity: o }} />
+          <circle key={`n${i}`} cx={x} cy={y} r={(st === 'ivory' ? 4 : 3.4) * lerp(1, 1.15, k)} className={`sig__n ${st === 'brass' ? 'is-brass' : ''}`} style={{ opacity: o }} />
         );
       })}
-      {Object.entries(WORD_AT).map(([ai, word], j) => {
-        const n = g.nodes[ai];
-        const o = soft(seg(p, 0.05 + j * 0.035, 0.12 + j * 0.035)) * (1 - seg(p, 0.34 + j * 0.012, 0.42 + j * 0.012));
+      {/* every identity's label rides with its node and dissolves on the way in */}
+      {g.labels.map((l, j) => {
+        const n = g.byIdentity[j];
+        const [x, y, k] = pos[n.ai];
+        const appear = soft(seg(p, n.appear + 0.02, n.appear + 0.08));
+        const dissolve = seg(k, 0, 0.55);
+        const o = appear * (1 - dissolve);
         if (o <= 0) return null;
-        const [x, y] = pos[ai];
-        const right = n.a[0] < W - 140;
         return (
-          <text key={word} x={x + (right ? 12 : -12)} y={y - 10} textAnchor={right ? 'start' : 'end'} className="sig__word-id" style={{ opacity: o * 0.7 }}>
-            {word}
+          <text
+            key={l.text}
+            x={x + l.dx * (1 - dissolve * 0.5)}
+            y={y + l.dy * (1 - dissolve * 0.5)}
+            textAnchor={l.anchor}
+            className="sig__word-id"
+            style={{ opacity: o * 0.78, fontSize: `${lerp(11, 7, dissolve)}px`, letterSpacing: `${lerp(0.2, 0.04, dissolve)}em` }}
+          >
+            {l.text.toUpperCase()}
           </text>
         );
       })}
