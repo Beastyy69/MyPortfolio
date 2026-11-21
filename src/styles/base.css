@@ -192,6 +192,9 @@ html {
   vertical-align: top;
   padding-bottom: 0.08em;
   margin-bottom: -0.08em;
+  /* room for italic overhang and the game-mode drop shadow, without shifting spacing */
+  padding-right: 0.1em;
+  margin-right: -0.1em;
 }
 .split__word {
   display: inline-block;
