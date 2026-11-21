@@ -177,6 +177,7 @@ function NeuralPaths({ running }) {
         <motion.path
           key={i}
           d={a}
+          initial={{ d: a }}
           animate={running ? { d: [a, b, a] } : { d: a }}
           transition={running ? { duration: 22 + i * 5, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }}
           className={i % 2 ? 'is-b' : ''}
