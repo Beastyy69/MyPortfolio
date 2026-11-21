@@ -408,3 +408,17 @@
     width: 100%;
   }
 }
+
+/* spam trap: invisible to people, still in the form for bots */
+.console__honey {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.console__note a {
+  color: var(--text);
+  text-decoration: underline;
+}

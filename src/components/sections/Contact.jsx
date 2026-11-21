@@ -2,9 +2,9 @@
  * Contact section (the final scene).
  * Oversized heading animated by scroll, contact tiles (availability + local
  * time, email with copy, GitHub, LinkedIn) and a message form.
- * Validation shows only after a field is touched. On submit it opens the
- * visitor's mail app (mailto:) and plays a "Signal received" animation —
- * replace onSubmit with Formspree / EmailJS / your own API to send directly.
+ * Validation shows only after a field is touched. On submit it sends the
+ * message straight to my inbox through FormSubmit (form → email), with the
+ * visitor's address as reply‑to, then plays a "Signal received" animation.
  */
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
@@ -13,6 +13,9 @@ import { profile } from '../../data/profile.js';
 import Icon from '../ui/Icon.jsx';
 import Button from '../ui/Button.jsx';
 import SignalField from '../effects/SignalField.jsx';
+
+// form → email: messages are delivered to my inbox through FormSubmit's AJAX endpoint
+const CONTACT_ENDPOINT = `https://formsubmit.co/ajax/${profile.email}`;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FIELDS = [
@@ -134,7 +137,7 @@ function SignalReceived({ isRetro, onReset }) {
         </motion.span>
       </div>
       <h3>{isRetro ? 'SIGNAL RECEIVED · P2 JOINED' : 'Signal received.'}</h3>
-      <p>Your mail app should open with the message ready. If it didn’t, write to {profile.email}.</p>
+      <p>Your message reached my inbox. I’ll reply to the email address you gave.</p>
       <button type="button" className="received__again" onClick={onReset}>
         {isRetro ? '▶ SEND ANOTHER' : 'Send another transmission'}
       </button>
@@ -147,10 +150,12 @@ function Console() {
   const [values, setValues] = useState({ name: '', email: '', message: '' });
   const [touched, setTouched] = useState({});
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
   const errors = Object.fromEntries(Object.entries(validators).map(([k, fn]) => [k, fn(values[k])]));
   const valid = !Object.values(errors).some(Boolean);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setTouched({ name: true, email: true, message: true });
     if (!valid) {
@@ -158,10 +163,32 @@ function Console() {
       e.currentTarget.querySelector(`[name="${first}"]`)?.focus();
       return;
     }
-    const subject = encodeURIComponent(`Portfolio enquiry from ${values.name}`);
-    const body = encodeURIComponent(`${values.message}\n\n— ${values.name} (${values.email})`);
-    window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
-    setSent(true);
+    if (e.currentTarget.elements._honey?.value) return; // bots fill the hidden field
+    setSending(true);
+    setFailed(false);
+    try {
+      // delivered to my inbox through FormSubmit (form → email); reply-to is the visitor
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: values.name,
+          email: values.email,
+          message: values.message,
+          _replyto: values.email,
+          _subject: `Portfolio message from ${values.name}`,
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || String(data.success) !== 'true') throw new Error(data.message || 'send failed');
+      setSent(true);
+    } catch {
+      setFailed(true);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -221,11 +248,21 @@ function Console() {
                 );
               })}
             </div>
+            {/* hidden from people, tempting to bots */}
+            <input type="text" name="_honey" tabIndex={-1} autoComplete="off" className="console__honey" aria-hidden="true" />
             <div className="console__send">
-              <Button type="submit" variant="giant" icon="send" cursor="Send">
-                Send transmission
+              <Button type="submit" variant="giant" icon="send" cursor="Send" disabled={sending}>
+                {sending ? 'Sending…' : 'Send transmission'}
               </Button>
-              <p className="console__note">Opens your mail app · no data stored</p>
+              <p className="console__note" role={failed ? 'alert' : undefined}>
+                {failed ? (
+                  <>
+                    Couldn’t send right now — please email <a href={`mailto:${profile.email}`}>{profile.email}</a>
+                  </>
+                ) : (
+                  'Goes straight to my inbox · I reply by email'
+                )}
+              </p>
             </div>
           </motion.div>
         )}

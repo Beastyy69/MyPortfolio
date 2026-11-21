@@ -79,7 +79,7 @@ The name and role appear beneath it, then a few paths extend outward into the he
 | **Certificates** | Counter + credential ledger | Trophy badges that unlock and flip |
 | **Journey** | Sticky editorial timeline | Career campaign map |
 | **Core Run** | — | 30 rounds, timers, core targets, a new mechanic every 5 rounds, saved progress, keyboard + touch |
-| **Contact** | Oversized heading, contact tiles with live local time, validated form | Same, in the game palette |
+| **Contact** | Oversized heading, contact tiles with live local time, a validated form that emails me directly | Same, in the game palette |
 
 ### Everywhere
 Lenis smooth scrolling · custom cursor with contextual labels · magnetic buttons ·
@@ -284,28 +284,42 @@ Any static host works — the build is plain files in `dist/`.
 **Render (static site)**
 - Build command: `npm install && npm run build`
 - Publish directory: `dist`
+- Environment variable: `VITE_SITE_URL=https://your-domain.com` (no trailing slash)
 
-**Vercel / Netlify** detect Vite automatically (`npm run build`, output `dist`).
+**Search engines (SEO)**
+- `VITE_SITE_URL` fills in the canonical link, Open Graph / Twitter URLs and the
+  JSON‑LD `Person` data, and generates `robots.txt` and `sitemap.xml` at build time.
+- After deploying, add the site in **Google Search Console**, verify the domain and
+  submit `https://your-domain.com/sitemap.xml`.
+- The logo set (`public/logo.svg`, favicons, `og-image.png`) gives search results and
+  link previews a proper icon and preview card.
+
+**Contact form → email**
+- Messages are delivered to `mohitshaw236@gmail.com` through [FormSubmit](https://formsubmit.co)
+  (no account or API key). The visitor's address is set as reply‑to.
+- **One‑time step:** the very first message sent from the live site triggers a
+  FormSubmit activation email to that inbox — click *Activate* once, and every
+  message after that arrives normally.
 
 ---
 
 ## Commit history guide
 
-The history is organised so each commit explains one part of the project, in the
-order you would read it:
+The history is organised so each commit adds one complete part of the finished
+project, in the order you would read it (intermediate commits are for reading;
+the site runs from the last one):
 
 | Commits | Area |
 |---|---|
-| 1–3 | Tooling, HTML entry, documentation |
-| 4–5 | Design tokens and global styles |
-| 6–7 | Smooth scrolling, hooks, contexts (mode switch logic) |
-| 8–10 | Content data |
-| 11–14 | UI building blocks, navbar, music toggle |
-| 15–18 | Backgrounds, cursor, preloader, world‑change transition |
-| 19–23 | Portraits, Hero, About, Skills, Projects (AI/ML) |
-| 24–25 | Game Mode: project gallery (since replaced by the Mission Outpost), atlas and maps |
-| 26–27 | Journey, Certificates, *Core Run* |
-| 28 | Contact section and final app assembly |
+| 1–4 | Tooling, HTML entry with SEO, HS logo & icons, documentation |
+| 5–6 | Design tokens, global and layout styles |
+| 7–8 | Smooth scrolling, hooks, mode / profile contexts |
+| 9–12 | Content: profile, skills & learning journey, verified projects, verified certificates |
+| 13–16 | UI building blocks, navbar with logo, footer, music toggle |
+| 17–20 | World backgrounds, cursor, HS signature preloader, tile world transition |
+| 21–25 | Portraits, Hero, About, Skills, AI/ML Project Ecosystem |
+| 26–29 | Game Mode: Mission Outpost, Code Frontier atlas, journey + campaign trail, certificates |
+| 30–32 | *Core Run*, contact form with email delivery, app assembly and polish |
 
 ---
 

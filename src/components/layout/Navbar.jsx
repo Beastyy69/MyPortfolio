@@ -45,7 +45,7 @@ export default function Navbar() {
       <div className="nav__panel">
         <a href="#home" className="nav__brand" aria-label={`${profile.name} — back to top`} data-cursor="Top">
           <span className="nav__logo" aria-hidden="true">
-            {profile.initials}
+            <img src="/logo.svg" alt="" width="34" height="34" />
           </span>
           <span className="nav__brand-text">{isRetro ? 'P1 · HARSHIT' : profile.name}</span>
         </a>
