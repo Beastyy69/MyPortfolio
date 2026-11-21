@@ -7,10 +7,10 @@
   --tone: #b89b68;
 }
 .tone-blue {
-  --tone: #a7b9a3;
+  --tone: #8e9a89;
 }
 .tone-cyan {
-  --tone: #a7b9a3;
+  --tone: #8e9a89;
 }
 .tone-green {
   --tone: #9a9a8a;
@@ -44,6 +44,9 @@
   color: var(--text) !important;
 }
 .finale__mask:last-child .finale__word {
+  color: #b89b68 !important; /* aged brass — warm, never minty */
+}
+[data-mode='retro'] .finale__mask:last-child .finale__word {
   color: var(--accent) !important;
 }
 [data-mode='retro'] .hero__name .split__word {
@@ -83,7 +86,7 @@
 }
 [data-mode='retro'] .btn--primary:hover,
 [data-mode='retro'] .btn--giant:hover {
-  background: #d8b673;
+  background: #cbb48a;
   box-shadow: 5px 5px 0 #6e2a26;
 }
 .mode-toggle__thumb {
@@ -126,7 +129,7 @@
 /* ── Backdrop: quiet and static ── */
 .backdrop__glow {
   background: radial-gradient(60% 50% at 80% 0%, rgba(184, 155, 104, 0.12), transparent 70%),
-    radial-gradient(50% 45% at 0% 40%, rgba(167, 185, 163, 0.08), transparent 70%) !important;
+    radial-gradient(50% 45% at 0% 40%, rgba(142, 154, 137, 0.08), transparent 70%) !important;
 }
 .backdrop__grid {
   opacity: 0.6;
@@ -351,7 +354,7 @@
   isolation: isolate;
   background: #151c29;
   border: 1px solid rgba(244, 240, 232, 0.12);
-  box-shadow: 0 40px 80px -46px rgba(0, 0, 0, 0.9), 0 0 0 8px rgba(167, 185, 163, 0.04);
+  box-shadow: 0 40px 80px -46px rgba(0, 0, 0, 0.9), 0 0 0 8px rgba(142, 154, 137, 0.04);
   --mx: 0;
   --my: 0;
 }
@@ -606,7 +609,7 @@
 .backdrop__blob--2 {
   bottom: -18vmax;
   left: -14vmax;
-  background: radial-gradient(circle at 60% 50%, rgba(167, 185, 163, 0.12), transparent 65%);
+  background: radial-gradient(circle at 60% 50%, rgba(142, 154, 137, 0.12), transparent 65%);
   animation-duration: 46s;
   animation-delay: -12s;
 }
@@ -667,7 +670,7 @@
   height: 34%;
   left: -2%;
   bottom: 12%;
-  background: rgba(167, 185, 163, 0.1);
+  background: rgba(142, 154, 137, 0.1);
   transform: skewY(-8deg);
 }
 .ip__paper {

@@ -19,7 +19,7 @@ export default function SignalField() {
     let running = false;
     let sources = [];
     let sig = [];
-    const colors = isRetro ? ['#c9a45c', '#a8473a', '#7d9470', '#c08a4a'] : ['#a7b9a3', '#b89b68', '#a7b9a3'];
+    const colors = isRetro ? ['#c9a45c', '#a8473a', '#7d9470', '#c08a4a'] : ['#8e9a89', '#b89b68', '#8e9a89'];
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();

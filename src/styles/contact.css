@@ -3,7 +3,7 @@
   position: relative;
   overflow: hidden;
   padding-bottom: clamp(100px, 12vw, 160px);
-  background: radial-gradient(ellipse at 50% 60%, rgba(167, 185, 163, 0.12), transparent 60%);
+  background: radial-gradient(ellipse at 50% 60%, rgba(142, 154, 137, 0.12), transparent 60%);
 }
 [data-mode='retro'] .finale {
   background: radial-gradient(ellipse at 50% 60%, rgba(168, 71, 58, 0.12), transparent 60%);
@@ -49,7 +49,7 @@
   display: inline-block;
 }
 .finale__mask:last-child .finale__word {
-  background: linear-gradient(110deg, #fff 0%, #aab3c6 40%, #b89b68 75%, #a7b9a3);
+  background: linear-gradient(110deg, #fff 0%, #aab3c6 40%, #b89b68 75%, #8e9a89);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -187,7 +187,7 @@
   border: 1px solid rgba(244, 240, 232, 0.2);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 50px 100px -50px rgba(167, 185, 163, 0.6);
+  box-shadow: 0 50px 100px -50px rgba(142, 154, 137, 0.6);
   min-height: 460px;
 }
 .console__head {
@@ -363,9 +363,13 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  color: #fff;
-  background: var(--gradient);
+  color: #0c1018;
+  background: #b89b68; /* solid aged brass, no gradient */
   box-shadow: none;
+}
+[data-mode='retro'] .received__core {
+  color: #1b1512;
+  background: var(--accent);
 }
 .received h3 {
   font-size: clamp(1.6rem, 3vw, 2.2rem);

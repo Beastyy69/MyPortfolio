@@ -15,9 +15,9 @@
   opacity: 0.7;
 }
 .backdrop__glow {
-  background: radial-gradient(60% 50% at 80% 0%, rgba(167, 185, 163, 0.22), transparent 70%),
+  background: radial-gradient(60% 50% at 80% 0%, rgba(142, 154, 137, 0.22), transparent 70%),
     radial-gradient(50% 45% at 0% 35%, rgba(184, 155, 104, 0.18), transparent 70%),
-    radial-gradient(40% 40% at 60% 100%, rgba(167, 185, 163, 0.1), transparent 70%);
+    radial-gradient(40% 40% at 60% 100%, rgba(142, 154, 137, 0.1), transparent 70%);
 }
 .backdrop__grid {
   background-image: linear-gradient(rgba(244, 240, 232, 0.05) 1px, transparent 1px),
@@ -106,7 +106,7 @@
   right: 0;
   top: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #a7b9a3, #b89b68, #a7b9a3, transparent);
+  background: linear-gradient(90deg, transparent, #8e9a89, #b89b68, #8e9a89, transparent);
   box-shadow: none;
 }
 .wipe__label {
@@ -164,7 +164,7 @@
   overflow: visible;
 }
 .wipe__net line {
-  stroke: #a7b9a3;
+  stroke: #8e9a89;
   stroke-width: 1.2;
 }
 .wipe__net circle {
@@ -214,7 +214,7 @@ html.has-cursor label {
 }
 .cursor__ring.is-hover {
   border-color: var(--accent);
-  background: rgba(167, 185, 163, 0.1);
+  background: rgba(142, 154, 137, 0.1);
 }
 .cursor__ring.has-label {
   background: var(--accent);
@@ -282,7 +282,7 @@ html.has-cursor label {
   height: 38px;
   border-radius: 10px;
   color: var(--accent);
-  background: rgba(167, 185, 163, 0.14);
+  background: rgba(142, 154, 137, 0.14);
   flex: none;
 }
 .toast strong {
@@ -418,11 +418,11 @@ html.has-cursor label {
 }
 .world__terrain path {
   fill: none;
-  stroke: rgba(167, 185, 163, 0.2);
+  stroke: rgba(142, 154, 137, 0.2);
   stroke-width: 1;
 }
 .world__terrain path.is-col {
-  stroke: rgba(167, 185, 163, 0.07);
+  stroke: rgba(142, 154, 137, 0.07);
 }
 .world__peak {
   fill: rgba(216, 197, 157, 0.4);
@@ -431,14 +431,14 @@ html.has-cursor label {
 .world__stream-base {
   fill: none;
   stroke-width: 1.2;
-  stroke: rgba(167, 185, 163, 0.07);
+  stroke: rgba(142, 154, 137, 0.07);
 }
 .world__stream-flow {
   fill: none;
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-dasharray: 34 966;
-  stroke: rgba(167, 185, 163, 0.4);
+  stroke: rgba(142, 154, 137, 0.4);
   animation: stream-flow 40s linear infinite;
 }
 .world__streams .is-amber .world__stream-flow {

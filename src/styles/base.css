@@ -400,7 +400,7 @@ html {
 }
 [data-mode='retro'] .btn--primary:hover,
 [data-mode='retro'] .btn--giant:hover {
-  background: #d1a05e;
+  background: #bb9a6b;
   color: #1a0b00;
   box-shadow: 7px 7px 0 var(--accent-2), inset -4px -4px 0 rgba(0, 0, 0, 0.25), inset 4px 4px 0 rgba(255, 255, 255, 0.35);
 }

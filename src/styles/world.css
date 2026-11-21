@@ -922,7 +922,7 @@
   rotate: 1.5deg;
 }
 .atl .amap__cp-label small {
-  color: #e2c787;
+  color: #d4c398;
 }
 .atl .amap__cp:hover .amap__cp-label {
   background: #7d5f3a;
@@ -1454,7 +1454,7 @@
   color: #d07a6a;
 }
 .corerun__hud .is-met {
-  color: #9db38c;
+  color: #8e9a89;
 }
 .corerun__next {
   margin: -4px 0 12px;
@@ -1474,7 +1474,7 @@
   mix-blend-mode: normal;
 }
 .cursor--ai .cursor__ring {
-  border: 1px solid rgba(167, 185, 163, 0.55);
+  border: 1px solid rgba(142, 154, 137, 0.55);
   background: rgba(184, 155, 104, 0.06);
 }
 .cursor--ai .cursor__ring.is-hover {
@@ -1669,7 +1669,7 @@
   font-family: var(--font-mono);
   font-size: 0.9rem;
   font-weight: 400;
-  color: #e2c787;
+  color: #d4c398;
 }
 .cmap__stop:hover .cmap__sign,
 .cmap__stop:focus-visible .cmap__sign {

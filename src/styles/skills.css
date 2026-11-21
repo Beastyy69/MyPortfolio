@@ -441,7 +441,7 @@
   stroke-dasharray: 2 6;
 }
 .nu__edge {
-  stroke: rgba(167, 185, 163, 0.38);
+  stroke: rgba(142, 154, 137, 0.38);
   stroke-width: 1.1;
 }
 .nu__edge.is-on {
@@ -483,7 +483,7 @@
 .nu__hub-ring--2 {
   inset: 22px;
   border-style: dashed;
-  border-color: rgba(167, 185, 163, 0.3);
+  border-color: rgba(142, 154, 137, 0.3);
   animation: nu-turn 60s linear infinite;
 }
 @keyframes nu-turn {
@@ -551,9 +551,9 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #a7b9a3;
+  background: #8e9a89;
   border: 2px solid #0c1018;
-  outline: 1px solid rgba(167, 185, 163, 0.5);
+  outline: 1px solid rgba(142, 154, 137, 0.5);
   outline-offset: 3px;
   transition: background-color 0.3s, outline-color 0.3s, transform 0.4s var(--ease);
 }
@@ -574,8 +574,8 @@
   opacity: 1;
 }
 .nu__node.is-near .nu__dot {
-  background: #a7b9a3;
-  outline-color: rgba(167, 185, 163, 0.7);
+  background: #8e9a89;
+  outline-color: rgba(142, 154, 137, 0.7);
 }
 .nu__node.is-active .nu__dot {
   background: #d8c59d;
@@ -744,7 +744,7 @@
 }
 .nu__paths path {
   fill: none;
-  stroke: rgba(167, 185, 163, 0.09);
+  stroke: rgba(142, 154, 137, 0.09);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
@@ -858,7 +858,7 @@
 }
 .nu__ambient {
   fill: none;
-  stroke: rgba(167, 185, 163, 0.5);
+  stroke: rgba(142, 154, 137, 0.5);
   stroke-width: 1.2;
 }
 .nu__hint {

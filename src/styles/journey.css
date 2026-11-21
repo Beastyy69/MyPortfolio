@@ -58,7 +58,7 @@
 }
 .tl__spine-base {
   fill: none;
-  stroke: rgba(167, 185, 163, 0.18);
+  stroke: rgba(142, 154, 137, 0.18);
   stroke-width: 1.5;
 }
 .tl__spine-grow {
@@ -101,7 +101,7 @@
   height: 16px;
   transform: rotate(45deg);
   background: #0c1018;
-  border: 1.5px solid rgba(167, 185, 163, 0.55);
+  border: 1.5px solid rgba(142, 154, 137, 0.55);
   transition: background 0.4s, border-color 0.4s;
 }
 .tl__marker b {
@@ -116,7 +116,7 @@
   flex: 1;
   height: 1px;
   margin-right: 12px;
-  background: rgba(167, 185, 163, 0.25);
+  background: rgba(142, 154, 137, 0.25);
 }
 .tl__item.is-active .tl__marker i,
 .tl__item.is-past .tl__marker i {
@@ -147,7 +147,7 @@
   font-size: 0.74rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #a7b9a3;
+  color: #8e9a89;
 }
 .tl__now {
   display: inline-flex;

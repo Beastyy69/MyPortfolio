@@ -48,7 +48,7 @@
 .scanner__grade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(12, 16, 24, 0) 40%, rgba(12, 16, 24, 0.75)), linear-gradient(120deg, rgba(167, 185, 163, 0.18), transparent 50%, rgba(184, 155, 104, 0.22));
+  background: linear-gradient(180deg, rgba(12, 16, 24, 0) 40%, rgba(12, 16, 24, 0.75)), linear-gradient(120deg, rgba(142, 154, 137, 0.18), transparent 50%, rgba(184, 155, 104, 0.22));
 }
 .scanner__line {
   position: absolute;
@@ -57,9 +57,9 @@
   height: 90px;
   margin-top: -90px;
   z-index: 2;
-  background: linear-gradient(180deg, transparent, rgba(167, 185, 163, 0.22));
-  border-bottom: 2px solid #a7b9a3;
-  box-shadow: 0 6px 24px rgba(167, 185, 163, 0.6);
+  background: linear-gradient(180deg, transparent, rgba(142, 154, 137, 0.22));
+  border-bottom: 2px solid #8e9a89;
+  box-shadow: 0 6px 24px rgba(142, 154, 137, 0.6);
   pointer-events: none;
 }
 .scanner__corner {
@@ -133,7 +133,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--accent-3);
-  box-shadow: 0 0 0 4px rgba(167, 185, 163, 0.25);
+  box-shadow: 0 0 0 4px rgba(142, 154, 137, 0.25);
 }
 .scanner__foot {
   margin-top: 14px;
@@ -308,7 +308,7 @@
 }
 .roles li:hover {
   padding-left: 16px;
-  background: linear-gradient(90deg, rgba(167, 185, 163, 0.1), transparent);
+  background: linear-gradient(90deg, rgba(142, 154, 137, 0.1), transparent);
 }
 .roles__idx {
   font-family: var(--font-mono);

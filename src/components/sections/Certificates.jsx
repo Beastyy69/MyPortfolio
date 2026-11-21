@@ -209,13 +209,13 @@ function Torch({ side, live }) {
   return (
     <svg className={`hall__torch hall__torch--${side}`} viewBox="0 0 40 120" aria-hidden="true">
       {/* warm light pool on the wall (muted, no glow) */}
-      <motion.ellipse cx="20" cy="34" rx="34" ry="40" fill="#e2c48d" initial={{ opacity: 0.1 }} animate={live ? { opacity: [0.08, 0.14, 0.09, 0.13, 0.08] } : undefined} transition={{ duration: 2.4, repeat: Infinity }} />
+      <motion.ellipse cx="20" cy="34" rx="34" ry="40" fill="#d2c29f" initial={{ opacity: 0.1 }} animate={live ? { opacity: [0.08, 0.14, 0.09, 0.13, 0.08] } : undefined} transition={{ duration: 2.4, repeat: Infinity }} />
       <path d="M14 56 h12 l-3 50 h-6 Z" fill="#5a4029" stroke="#2a1f17" strokeWidth="2" />
       <path d="M10 52 h20 v6 h-20 Z" fill="#b8955a" stroke="#2a1f17" strokeWidth="2" />
       {/* invisible circle centred on the wick, so the flame flickers from its base */}
       <motion.g animate={live ? { scaleY: [1, 1.15, 0.92, 1.08, 1], scaleX: [1, 0.92, 1.05, 0.96, 1] } : undefined} transition={{ duration: 1.1, repeat: Infinity }}>
         <circle cx="20" cy="52" r="32" fill="none" stroke="none" />
-        <path d="M20 52 C10 44 14 32 20 22 C26 32 30 44 20 52 Z" fill="#c79a3e" stroke="#2a1f17" strokeWidth="1.6" />
+        <path d="M20 52 C10 44 14 32 20 22 C26 32 30 44 20 52 Z" fill="#b39356" stroke="#2a1f17" strokeWidth="1.6" />
         <path d="M20 50 C16 45 17 38 20 33 C23 38 24 45 20 50 Z" fill="#8a3d33" />
       </motion.g>
     </svg>

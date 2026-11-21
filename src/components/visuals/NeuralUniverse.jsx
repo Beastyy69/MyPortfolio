@@ -136,7 +136,7 @@ function Field({ running }) {
           const d = Math.hypot(p.x - q.x, p.y - q.y);
           if (d < 120) {
             const pulse = 0.5 + 0.5 * Math.sin(time / 2400 + i * 0.7);
-            ctx.strokeStyle = `rgba(167,185,163,${(1 - d / 120) * 0.1 * pulse})`;
+            ctx.strokeStyle = `rgba(142,154,137,${(1 - d / 120) * 0.1 * pulse})`;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);

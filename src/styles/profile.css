@@ -23,7 +23,7 @@
   border-radius: 28px;
   background: linear-gradient(160deg, #1c2130, #12151e 70%);
   border: 1px solid rgba(244, 240, 232, 0.25);
-  box-shadow: 0 60px 120px -40px rgba(167, 185, 163, 0.55);
+  box-shadow: 0 60px 120px -40px rgba(142, 154, 137, 0.55);
 }
 .modal__dialog--retro {
   border-radius: 0;

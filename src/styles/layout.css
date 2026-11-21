@@ -210,7 +210,7 @@
 }
 .mode-toggle:hover {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(167, 185, 163, 0.12);
+  box-shadow: 0 0 0 4px rgba(142, 154, 137, 0.12);
 }
 .mode-toggle:disabled {
   cursor: progress;

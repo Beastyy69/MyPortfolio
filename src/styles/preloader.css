@@ -31,10 +31,10 @@
   fill: #b89b68;
 }
 .sig__n.is-sage {
-  fill: #a7b9a3;
+  fill: #8e9a89;
 }
 .sig__edge {
-  stroke: rgba(167, 185, 163, 0.34);
+  stroke: rgba(142, 154, 137, 0.34);
   stroke-width: 1;
 }
 .sig__frag-line {
@@ -53,14 +53,14 @@
 }
 .sig__ray {
   fill: none;
-  stroke: rgba(167, 185, 163, 0.45);
+  stroke: rgba(142, 154, 137, 0.45);
   stroke-width: 1;
 }
 
 /* the mark */
 .sig__skel {
   fill: none;
-  stroke: rgba(167, 185, 163, 0.8);
+  stroke: rgba(142, 154, 137, 0.8);
   stroke-width: 1.3;
   stroke-linecap: round;
 }
@@ -82,7 +82,7 @@
   fill: #b89b68;
 }
 .sig__join-sq {
-  fill: #a7b9a3;
+  fill: #8e9a89;
 }
 .sig__mono {
   transform-box: fill-box;

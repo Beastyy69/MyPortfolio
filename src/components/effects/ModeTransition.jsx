@@ -23,7 +23,7 @@ import { useMode } from '../../context/ModeContext.jsx';
 const ease = [0.65, 0, 0.35, 1];
 const out = [0.22, 1, 0.36, 1];
 
-const GAME = ['#5e2430', '#c79a3e', '#e6d7b4', '#8a9a78', '#3a2a20', '#9c4a3c', '#1d1a19', '#8e86a3']; // lavender only reaches the outer ring
+const GAME = ['#5e2430', '#b39356', '#e6d7b4', '#8a9a78', '#3a2a20', '#9c4a3c', '#1d1a19', '#8e86a3']; // lavender only reaches the outer ring
 const TERRAIN = ['#5d6b3f', '#4b5734', '#7a5a3a', '#6b4b30'];
 const INKS = ['#0c1018', '#121824', '#151c29'];
 
@@ -217,7 +217,7 @@ function ToAI({ phase, g }) {
                     y: t.dy,
                     scale: 0.05,
                     borderRadius: '50%',
-                    backgroundColor: '#a7b9a3',
+                    backgroundColor: '#8e9a89',
                     opacity: [1, 1, 0],
                     transition: { duration: 0.5, delay: t.dist * 0.1, ease, opacity: { duration: 0.5, times: [0, 0.75, 1] } },
                   }

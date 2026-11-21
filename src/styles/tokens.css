@@ -13,18 +13,18 @@
   --text: #f4f0e8; /* warm ivory */
   --text-muted: #b5bdc9;
   --text-dim: #8a93a1;
-  --accent: #a7b9a3; /* muted sage */
+  --accent: #8e9a89; /* muted sage */
   --accent-2: #b89b68; /* aged brass */
   --accent-3: #d8c59d; /* muted parchment gold (active states) */
   --accent-4: #b5bdc9; /* soft cool gray */
-  --success: #7fa08f;
+  --success: #8a9a7e;
   --on-accent: #0c1018;
   --border: rgba(244, 240, 232, 0.1);
   --border-strong: rgba(244, 240, 232, 0.24);
   --glow: none;
   --shadow: 0 24px 50px -30px rgba(0, 0, 0, 0.75);
   --shadow-hover: 0 30px 60px -30px rgba(0, 0, 0, 0.85);
-  --gradient: linear-gradient(120deg, #a7b9a3 0%, #b89b68 100%);
+  --gradient: linear-gradient(120deg, #8e9a89 0%, #a98f63 100%);
   --radius: 14px;
   --radius-sm: 8px;
   --radius-pill: 999px;

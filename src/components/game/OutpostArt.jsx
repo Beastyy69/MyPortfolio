@@ -28,7 +28,7 @@ export const C = {
   woodDk: '#5a4029',
   olive: '#5d6b3f',
   oliveDk: '#46522f',
-  gold: '#c79a3e',
+  gold: '#b39356',
   red: '#8a3d33',
   char: '#2a2420',
 };

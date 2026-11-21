@@ -8,8 +8,8 @@ import { motion, useAnimationFrame, useInView } from 'framer-motion';
    Every scene is static when `still` is true (reduced motion).
    ───────────────────────────────────────────────────────────── */
 
-const SAGE = 'rgba(167,185,163,0.55)';
-const SAGE_FAINT = 'rgba(167,185,163,0.22)';
+const SAGE = 'rgba(142,154,137,0.55)';
+const SAGE_FAINT = 'rgba(142,154,137,0.22)';
 const BRASS = '#b89b68';
 const IVORY = '#f4f0e8';
 const loop = (duration, delay = 0) => ({ duration, delay, repeat: Infinity, ease: 'easeInOut' });

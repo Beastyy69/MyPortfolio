@@ -24,7 +24,7 @@
   z-index: 2;
 }
 .ws__netline {
-  stroke: rgba(167, 185, 163, 0.55);
+  stroke: rgba(142, 154, 137, 0.55);
   stroke-width: 1.2;
 }
 .ws__netnode {
@@ -88,7 +88,7 @@
 .ws__plaque.is-ai {
   background: rgba(12, 16, 24, 0.92);
   color: #f4f0e8;
-  border: 1px solid rgba(167, 185, 163, 0.35);
+  border: 1px solid rgba(142, 154, 137, 0.35);
 }
 .ws__plaque.is-ai span {
   color: #b89b68;
