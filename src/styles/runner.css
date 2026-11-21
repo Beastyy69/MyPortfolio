@@ -1,0 +1,285 @@
+/* ───────────── Hero links ───────────── */
+.hero__cta {
+  align-items: center;
+}
+.hlinks {
+  display: flex;
+  gap: 10px;
+}
+.hlink {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.04);
+  transition: border-color 0.25s, color 0.25s, background-color 0.25s;
+}
+.hlink:hover,
+.hlink:focus-visible {
+  color: #fff;
+  border-color: var(--accent);
+  background: rgba(167, 185, 163, 0.2);
+}
+.hlink__tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  translate: -50% 4px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--text);
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, translate 0.25s var(--ease);
+}
+.hlink:hover .hlink__tip,
+.hlink:focus-visible .hlink__tip {
+  opacity: 1;
+  translate: -50% 0;
+}
+.hlinks--retro {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 10px 16px;
+  width: 100%;
+  margin-top: 6px;
+}
+.hlink-r {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 8px 8px;
+  border: 2px solid rgba(201, 164, 92, 0.45);
+  background: #000;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+.hlink-r:hover,
+.hlink-r:focus-visible {
+  transform: translate(-2px, -2px);
+  border-color: var(--accent-4);
+  box-shadow: 4px 4px 0 var(--accent-2);
+}
+.hlink-r__key {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: #1b1512;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+}
+.hlink-r__key--A {
+  background: #7d9470;
+}
+.hlink-r__key--B {
+  background: #a8473a;
+}
+.hlink-r__key--X {
+  background: #c9a45c;
+}
+.hlink-r__key--Y {
+  background: #c08a4a;
+}
+.hlink-r__label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: #fff;
+}
+
+/* ───────────── Debug Runner ───────────── */
+.runner {
+  border-top: 2px solid rgba(168, 71, 58, 0.5);
+}
+.runner__screen {
+  position: relative;
+}
+.runner__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 960 / 220;
+  min-height: 170px;
+  object-fit: cover;
+  image-rendering: pixelated;
+  touch-action: manipulation;
+}
+.runner__canvas:focus-visible {
+  outline: 3px solid var(--accent-4);
+  outline-offset: -3px;
+}
+.runner__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 12px;
+  text-align: center;
+  background: rgba(27, 21, 18, 0.72);
+}
+.runner__title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.8rem, 2.4vw, 1.3rem);
+  color: #fff;
+  text-shadow: 3px 3px 0 #a8473a;
+}
+.runner__goal {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #efe4cc;
+}
+.runner__goal .c {
+  color: #c9a45c;
+}
+.runner__goal .r {
+  color: #c27a68;
+}
+.runner__keys {
+  font-family: 'VT323', monospace;
+  font-size: 1.05rem;
+  color: #cfc1a3;
+}
+.runner__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  padding: 10px clamp(12px, 3vw, 24px);
+  background: #1b1512;
+  border-bottom: 2px solid rgba(201, 164, 92, 0.4);
+}
+.runner__stat {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: #c2b394;
+}
+.runner__stat b {
+  font-family: 'VT323', monospace;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: #c9a45c;
+  margin-left: 6px;
+}
+.runner__stat b.is-hi {
+  color: #c08a4a;
+}
+.runner__pad {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.runner__pad button {
+  width: 46px;
+  height: 46px;
+  color: #1b1512;
+  background: #c9a45c;
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  user-select: none;
+  touch-action: none;
+}
+.runner__pad button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+.runner__pad .runner__pause {
+  background: #c08a4a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+}
+@media (max-width: 560px) {
+  .hlinks--retro {
+    grid-template-columns: 1fr;
+  }
+  .runner__pad {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .runner__pad button {
+    flex: 1;
+  }
+}
+.runner__auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: #7d9470;
+}
+.runner__legend {
+  margin-left: auto;
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: #cfc1a3;
+}
+.runner__legend .c {
+  color: #c9a45c;
+}
+.runner__legend .r {
+  color: #c27a68;
+  margin-left: 10px;
+}
+
+/* Code Runner: Data Rescue — tutorial card over the attract demo */
+.runner__canvas {
+  aspect-ratio: 960 / 240 !important;
+  min-height: 190px;
+}
+.runner__overlay--card {
+  background: linear-gradient(90deg, rgba(27, 21, 18, 0.88) 0%, rgba(27, 21, 18, 0.6) 55%, transparent 80%) !important;
+  justify-items: start !important;
+  text-align: left !important;
+  place-content: center start !important;
+  padding-left: clamp(16px, 4vw, 48px) !important;
+}
+.runner__card {
+  display: grid;
+  gap: 8px;
+  max-width: 460px;
+  justify-items: start;
+}
+.runner__card .runner__title {
+  font-size: clamp(0.7rem, 1.8vw, 1rem);
+  text-shadow: 3px 3px 0 #6e2a26;
+}
+.runner__story {
+  font-size: 0.95rem;
+  color: #efe4cc;
+}
+.runner__rules {
+  display: grid;
+  gap: 2px;
+  font-size: 0.88rem;
+  color: #cfc1a3;
+}
+.runner__rules .c {
+  color: #c9a45c;
+}
+.runner__rules .r {
+  color: #c27a68;
+}
+.runner__pad button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .runner__overlay--card {
+    background: rgba(27, 21, 18, 0.88) !important;
+  }
+  .runner__story {
+    display: none;
+  }
+}
