@@ -20,12 +20,11 @@ const CONTEXT = [
   ['.atl__hit, .amap__cp', 'Explore', 'Enter Zone'],
   ['.cmap__stop, .cmap__viewport', 'Explore', 'Travel'],
   ['.wp', 'Explore', 'Travel'],
-  ['.mplaque', 'View Project', 'Select'],
-  ['.msel__view', 'View Project', 'Brief'],
-  ['.case__media, .case__title', 'View Project', 'Open Mission'],
+  ['.out__place, .out__chip', 'View Project', 'Enter'],
+  ['.eco__mod', 'Focus', 'Focus'],
   ['.nu__node, .amap__abilities button', 'Inspect', 'Select'],
-  ['.nu__cluster, .nu__focus button, .msel__token, .filters__btn', 'Explore', 'Select'],
-  ['.dossier__btn, .case__actions a', 'Open', 'Open'],
+  ['.nu__cluster, .nu__focus button', 'Explore', 'Select'],
+  ['.dossier__btn', 'Open', 'Open'],
 ];
 
 function labelFor(target, retro) {

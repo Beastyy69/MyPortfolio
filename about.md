@@ -16,7 +16,7 @@ carries them across, and they stay on the same section at the same scroll positi
 2. **Hero** — name, role, tagline, links (Game Mode adds the World Preview Strip)
 3. **About** — story, roles and stats; the hero photo morphs into the *About My Work* panel
 4. **Skills** — neural "My Skills" universe / Code Frontier Atlas
-5. **Projects** — editorial case studies / Mission Select Gallery
+5. **Projects** — Project Ecosystem / Mission Outpost, with Hologram With AI as the flagship
 6. **Certificates** — credential ledger / trophy badges
 7. **Journey** — sticky timeline / career campaign map
 8. **Core Run** — Game Mode only: a 30‑round original platformer

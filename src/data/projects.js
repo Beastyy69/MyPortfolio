@@ -1,151 +1,126 @@
-// Projects. `art` picks a built‑in illustration; set `image` to use a screenshot instead.
-// Replace demo links (#) with your real repo / demo URLs.
-import mailmind from '../assets/mailmind.jpg';
+/* ─────────────────────────────────────────────────────────────
+   Projects — every entry is a real repository. GitHub is the source of
+   truth: summaries, features and stacks below come only from each repo's
+   README, description and language data (checked 2026‑11‑21). Nothing
+   here is invented; for full details every project links to its repo.
 
-export const projectFilters = [
-  { id: 'all', label: 'All work', retro: 'ALL WORLDS' },
-  { id: 'ai', label: 'AI / ML', retro: 'WORLD 1 · AI' },
-  { id: 'backend', label: 'Backend', retro: 'WORLD 2 · API' },
-  { id: 'data', label: 'Data', retro: 'WORLD 3 · DATA' },
-  { id: 'games', label: 'Game AI', retro: 'WORLD 4 · ARCADE' },
-];
+   Fields
+     repo        "owner/name" — used for the GitHub link and live star count
+     role        'Creator' or 'Contributor' (verified from commit history)
+     live        only when the repository itself lists a homepage
+     stars       snapshot verified on the date above; the UI fetches the
+                 live count from GitHub and falls back to this
+     place       Game Mode location on the Code Frontier map
+   ───────────────────────────────────────────────────────────── */
 
-// Game‑mode mission categories (a project can sit in several).
-export const missionFilters = [
-  { id: 'all', label: 'All missions' },
-  { id: 'ai', label: 'AI' },
-  { id: 'backend', label: 'Backend' },
-  { id: 'data', label: 'Data' },
-  { id: 'web', label: 'Web' },
-  { id: 'arcade', label: 'Arcade' },
-];
+const gh = (repo) => `https://github.com/${repo}`;
 
 export const projects = [
   {
-    id: 'recommendo',
-    missionType: 'Recommendation systems',
-    tags: ['ai', 'backend'],
-    env: 'Signal Routing Station',
-    challenge:
-      'New items had no interaction history (cold start). The ranker blends content embeddings with collaborative signals, and Redis caches hot results so responses stay real-time.',
-    status: 'complete',
-    title: 'Recommendo',
-    subtitle: 'AI Recommendation Engine',
-    category: 'ai',
-    level: '1-1',
-    difficulty: 4,
-    art: 'recommender',
+    id: 'hologram',
     featured: true,
+    title: 'Hologram With AI',
+    repo: 'Beastyy69/Hologram-With-AI',
+    role: 'Creator',
+    category: 'Computer Vision · HCI',
+    tagline: 'Touchless, gesture‑controlled AR and mouse control from a webcam.',
     summary:
-      'Hybrid recommender that blends collaborative filtering with content embeddings to rank items in real time, served through a cached FastAPI endpoint.',
-    metric: { value: '+32%', label: 'offline CTR uplift' },
-    stack: ['Python', 'PyTorch', 'FastAPI', 'Redis', 'PostgreSQL'],
-    github: 'https://github.com/Beastyy69',
-    demo: '#',
-  },
-  {
-    id: 'visionsight',
-    missionType: 'Computer vision',
-    tags: ['ai'],
-    env: 'Observation Outpost',
-    challenge:
-      'Keeping detection fast enough for a live feed on a laptop CPU — a lighter fine‑tuned model, frame skipping and WebSocket streaming keep it smooth.',
-    status: 'complete',
-    title: 'VisionSight',
-    subtitle: 'Real‑time Object Detection',
-    category: 'ai',
-    level: '1-2',
-    difficulty: 4,
-    art: 'detection',
-    summary:
-      'Fine‑tuned detection model that tracks people and vehicles from a live camera feed, streaming annotated frames to the browser over WebSockets.',
-    metric: { value: '28 FPS', label: 'on a laptop CPU' },
-    stack: ['PyTorch', 'OpenCV', 'FastAPI', 'WebSockets'],
-    github: 'https://github.com/Beastyy69',
-    demo: '#',
-  },
-  {
-    id: 'atlas',
-    missionType: 'API platform',
-    tags: ['backend'],
-    env: 'API Relay Tower',
-    challenge:
-      'Holding low latency under bursty traffic: async endpoints, Redis rate limiting and Celery workers for slow jobs, verified with load tests.',
-    status: 'complete',
-    title: 'Atlas API',
-    subtitle: 'Scalable FastAPI Backend',
-    category: 'backend',
-    level: '2-1',
-    difficulty: 5,
-    art: 'api',
-    summary:
-      'Async FastAPI service with JWT auth, rate limiting, background workers and PostgreSQL — containerised and load‑tested for high‑traffic workloads.',
-    metric: { value: '<80ms', label: 'p95 latency @ 2k rps' },
-    stack: ['FastAPI', 'PostgreSQL', 'Redis', 'Celery', 'Docker'],
-    github: 'https://github.com/Beastyy69',
-    demo: '#',
-  },
-  {
-    id: 'forecastly',
-    missionType: 'Forecasting dashboard',
-    tags: ['data', 'web'],
-    env: 'Weather Observatory',
-    challenge:
-      'Making model output usable by non‑technical teams — feature importance and what‑if sliders turn raw predictions into decisions.',
-    status: 'complete',
-    title: 'Forecastly',
-    subtitle: 'ML Prediction Dashboard',
-    category: 'data',
-    level: '3-1',
-    difficulty: 3,
-    art: 'dashboard',
-    summary:
-      'Interactive dashboard that forecasts sales and churn with gradient‑boosted models, with feature importance and what‑if sliders for non‑technical teams.',
-    metric: { value: '0.91', label: 'R² on hold‑out data' },
-    stack: ['Scikit-learn', 'Pandas', 'Flask', 'Plotly', 'SQL'],
-    github: 'https://github.com/Beastyy69',
-    demo: '#',
-  },
-  {
-    id: 'pixelpilot',
-    missionType: 'Reinforcement learning',
-    tags: ['arcade', 'ai'],
-    env: 'Prototype Workshop',
-    challenge:
-      'Learning from raw pixels with sparse rewards — reward shaping and frame stacking give the PPO agent enough signal to clear the stage.',
-    status: 'in-progress',
-    title: 'Pixel Pilot',
-    subtitle: 'RL Agent for a Retro Platformer',
-    category: 'games',
-    level: '4-1',
-    difficulty: 5,
-    art: 'rl',
-    summary:
-      'An original pixel platformer built in Pygame plus a PPO agent that learns to clear it from raw frames — with a live reward graph and replay viewer.',
-    metric: { value: '2.1M', label: 'steps to clear stage 1' },
-    stack: ['Python', 'Pygame', 'PyTorch', 'Gymnasium'],
-    github: 'https://github.com/Beastyy69',
-    demo: '#',
+      'A real‑time hand‑gesture interaction system built with OpenCV and MediaPipe. Using only a webcam, you can manipulate 3D AR shapes, control the mouse pointer, clicks and drag, and draw in the air — with Kalman‑filter smoothing for stable tracking.',
+    highlights: [
+      '3D AR object mode — rotate, scale and move shapes with gestures',
+      'Touchless mouse — pinch to click, fist to drag',
+      'Air drawing with the index finger in multiple colours',
+      'Optional AI voice shapes via Gemini (disabled in the public version)',
+    ],
+    stack: ['Python', 'OpenCV', 'MediaPipe', 'NumPy', 'Kalman filter', 'PyAutoGUI', 'pynput', 'Gemini API (optional)'],
+    stars: 7,
+    forks: 12,
+    place: 'The Observatory',
+    placeNote: 'Flagship mission',
   },
   {
     id: 'mailmind',
-    missionType: 'Productivity AI',
-    tags: ['ai', 'web'],
-    env: 'Sorting Post',
-    challenge:
-      'Noisy inboxes and long threads — one flow sorts mail, summarizes threads and drafts context‑aware replies through the Gemini API.',
-    status: 'complete',
-    title: 'MailMind AI',
-    subtitle: 'AI Inbox Organizer',
-    category: 'ai',
-    level: '1-3',
-    difficulty: 3,
-    image: mailmind,
+    title: 'Mail Mind Pro',
+    repo: 'Beastyy69/Mail-Mind-Pro',
+    role: 'Creator',
+    category: 'AI Productivity',
+    tagline: 'AI email intelligence for Gmail, powered by Gemini.',
     summary:
-      'AI‑powered mail organizer that sorts the inbox, summarizes long threads and drafts context‑aware replies using the Gemini API.',
-    metric: { value: '3‑in‑1', label: 'sort · summarize · reply' },
-    stack: ['JavaScript', 'Gemini API', 'HTML', 'CSS'],
-    github: 'https://github.com/Beastyy69',
-    demo: '#',
+      'An AI‑powered email manager for Gmail: it classifies emails by intent, detects urgency and sentiment, writes short summaries and suggests context‑aware replies using Google Gemini — with secure Gmail OAuth2 and in‑browser processing.',
+    highlights: ['Intent classification and urgency detection', 'AI summaries and smart reply suggestions', 'Dashboard with filters by urgency, intent and status'],
+    stack: ['JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'Gemini API', 'Gmail API', 'OAuth2'],
+    live: 'https://mailmind-rkj5.onrender.com',
+    place: 'Message Relay Station',
+  },
+  {
+    id: 'rugradar',
+    title: 'RugRadar',
+    repo: 'Beastyy69/RugRadar',
+    role: 'Creator',
+    category: 'Security · Full‑stack',
+    tagline: 'A full‑stack crypto‑address risk scanner.',
+    summary:
+      'Scan a crypto address and review its risk report and history. A React client talks to an Express API with MongoDB‑backed scan history, and a FastAPI service assembles the risk assessment from blockchain and security data sources.',
+    highlights: ['Address risk reports and scan history', 'Three services: React client, Express API, FastAPI scoring', 'Returns risk signals — not financial advice'],
+    stack: ['React', 'Vite', 'Express', 'MongoDB', 'FastAPI', 'Python'],
+    place: 'Tracking Outpost',
+  },
+  {
+    id: 'roastme',
+    title: 'RoastMe AI',
+    repo: 'Beastyy69/RoastMe',
+    role: 'Creator',
+    category: 'ML · Generative AI',
+    tagline: 'Safe, personalised roasts from your bio and habits.',
+    summary:
+      'An AI humour app with a React website and an Expo Android app on one FastAPI backend. A TF‑IDF + Logistic Regression classifier predicts the topic; the jokes come from NVIDIA Nemotron or Gemini, with local templates as a fallback. Includes an NPC Meter quiz and a Camera Roast with AR filters.',
+    highlights: ['Real scikit‑learn topic classifier', 'Multi‑provider LLM generation with template fallback', 'NPC Meter quiz and Camera Roast with MediaPipe filters'],
+    stack: ['React', 'Vite', 'Tailwind CSS', 'Expo', 'React Native', 'FastAPI', 'scikit‑learn', 'MediaPipe', 'MongoDB'],
+    live: 'https://roast-me-nu-khaki.vercel.app',
+    place: 'Creative Camp',
+  },
+  {
+    id: 'cinesense',
+    title: 'Movie Recommendation',
+    alias: 'CineSense',
+    repo: 'Beastyy69/MovieRecomendation',
+    role: 'Creator',
+    category: 'Recommendation Systems',
+    tagline: 'CineSense — local TF‑IDF movie recommendations.',
+    summary:
+      'CineSense recommends movies with local TF‑IDF similarity, remembers likes and watched titles in SQLite, and can explain picks with an optional local Gemma model through Ollama. A React frontend talks to a FastAPI backend; TMDB adds posters and trailers when configured.',
+    highlights: ['TF‑IDF content‑based recommendations', 'Watched titles are excluded from future picks', 'Optional local Gemma explanations — no cloud AI key needed'],
+    stack: ['Python', 'FastAPI', 'TF‑IDF', 'SQLite', 'React', 'Ollama · Gemma', 'Docker'],
+    place: 'Cinema Archive',
+  },
+  {
+    id: 'discordbot',
+    title: 'MultiDiscord Bot',
+    repo: 'Beastyy69/MultiDiscord-Bot',
+    role: 'Creator',
+    category: 'Community Automation',
+    tagline: 'A multi‑purpose Discord bot for active, well‑run servers.',
+    summary:
+      'A multi‑purpose Discord bot built with Node.js and Discord.js: music playback, moderation tools, reaction‑based giveaways, chatbot replies, welcome images and lightweight SQLite storage, with a small web server for free hosting platforms.',
+    highlights: ['Music, moderation and giveaways', 'Chatbot replies and welcome image cards', 'SQLite storage; runs on Replit, Railway or Render'],
+    stack: ['JavaScript', 'Node.js', 'Discord.js', 'SQLite'],
+    place: 'Communications Hub',
+  },
+  {
+    id: 'scheduler',
+    title: 'Scheduler AI',
+    repo: 'joydeep-devx/scheduler.ai',
+    role: 'Contributor',
+    roleNote: 'Contributor — face registration and face recognition',
+    category: 'AI · Smart Campus',
+    tagline: 'AI‑powered smart classroom management.',
+    summary:
+      'A team project that automates student attendance with face recognition and manages timetables, classroom occupancy and resources from central dashboards. Owned by joydeep‑devx; my commits cover face registration, face recognition and backend changes.',
+    highlights: ['Face‑recognition attendance', 'AI timetable generation and occupancy tracking', 'Dashboards for admins and faculty'],
+    stack: ['React', 'Node.js', 'Python', 'Face recognition'],
+    place: 'Planning Tower',
   },
 ];
+
+export const githubUrl = (p) => gh(p.repo);
+export const featuredProject = projects.find((p) => p.featured);

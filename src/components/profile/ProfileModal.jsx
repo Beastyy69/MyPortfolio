@@ -25,7 +25,7 @@ export const SOCIALS = [
 ];
 const ext = (href) => (href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {});
 
-const BUILDING = 'An RL agent that learns to clear an original pixel platformer — plus production polish on MailMind AI.';
+const BUILDING = 'CineSense — TF‑IDF movie recommendations with optional local Gemma explanations, after RoastMe AI and Hologram With AI.';
 
 /* ───────── AI: Developer Desk ───────── */
 const ROLES = [

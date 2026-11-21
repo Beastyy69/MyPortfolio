@@ -42,11 +42,11 @@ export const journey = [
   },
   {
     level: '05',
-    achievements: ['Shipped MailMind AI', 'Built recommendation and ML dashboards', 'Taking ideas from notebook to product'],
+    achievements: ['Built Hologram With AI', 'Shipped MailMind Pro and RoastMe AI', 'Contributed face recognition to Scheduler AI'],
     title: 'Building Real Products',
     aiTitle: 'Shipping AI Products',
     period: '2025 — Now',
-    text: 'Taking ideas from notebook to product: MailMind AI, recommendation systems and ML dashboards that real users can click on.',
+    text: 'Taking ideas from notebook to product: gesture-controlled AR, an AI inbox, a crypto risk scanner, a movie recommender and an AI comedy app that real users can open.',
     loot: ['Product thinking', 'MLOps', 'System design'],
     xp: 1600,
     current: true,

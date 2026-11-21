@@ -21,6 +21,7 @@ without losing your place.
 
 - [The idea](#the-idea)
 - [Highlights](#highlights)
+- [Projects featured](#projects-featured)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
 - [Project structure](#project-structure)
@@ -40,7 +41,7 @@ without losing your place.
 | Feel | A quiet, precise engineering portfolio | A premium, original adventure world |
 | Palette | Deep ink `#0C1018`, ivory `#F4F0E8`, sage `#A7B9A3`, brass `#B89B68` | Espresso, burgundy, parchment, mustard, olive, dusty red |
 | Skills | Neural "My Skills" universe | Code Frontier Atlas (campaign map of skill zones) |
-| Projects | Editorial case studies | Mission Select Gallery |
+| Projects | Project Ecosystem (flagship + connected modules) | Mission Outpost (project territory map) |
 | Journey | Sticky timeline | Career campaign map |
 | Extra | — | *Core Run*: a 30‑round platformer |
 
@@ -74,7 +75,7 @@ The name and role appear beneath it, then a few paths extend outward into the he
 | **Hero** | Intelligence portrait with layered frame; photo morphs into the *About My Work* panel | Cartridge cover + World Preview Strip under the navbar |
 | **About** | Statement, story chapters, roles, counting stats | Character‑select screen |
 | **Skills** | Neural universe: hover depth, click focus, connection animation, detail panel | Code Frontier Atlas: hand‑drawn map of skill zones |
-| **Projects** | Case‑study rows with image wipe, parallax and filters | Mission Select Gallery: brass‑framed plaques, category tokens, expandable mission briefings |
+| **Projects** | Project Ecosystem: Hologram With AI as the flagship centrepiece with a live GitHub star count; the other projects as connected modules with a focused panel and their own animated scene | Mission Outpost: a hand‑drawn territory map — every project is a place, and selecting one opens a full mission scene |
 | **Certificates** | Counter + credential ledger | Trophy badges that unlock and flip |
 | **Journey** | Sticky editorial timeline | Career campaign map |
 | **Core Run** | — | 30 rounds, timers, core targets, a new mechanic every 5 rounds, saved progress, keyboard + touch |
@@ -84,6 +85,20 @@ The name and role appear beneath it, then a few paths extend outward into the he
 Lenis smooth scrolling · custom cursor with contextual labels · magnetic buttons ·
 word‑by‑word heading reveals · scroll‑linked chapter transitions · vertical progress
 rail · layered parallax world backgrounds · optional background music (off by default).
+
+---
+
+## Projects featured
+
+| Project | What it is | Role |
+|---|---|---|
+| ⭐ **[Hologram With AI](https://github.com/Beastyy69/Hologram-With-AI)** — *flagship* | Touchless, gesture‑controlled AR shapes, mouse control and air drawing with OpenCV + MediaPipe | Creator |
+| **[Mail Mind Pro](https://github.com/Beastyy69/Mail-Mind-Pro)** | AI email intelligence for Gmail with Gemini: intent, urgency, summaries, replies | Creator |
+| **[RugRadar](https://github.com/Beastyy69/RugRadar)** | Full‑stack crypto‑address risk scanner (React, Express + MongoDB, FastAPI) | Creator |
+| **[RoastMe AI](https://github.com/Beastyy69/RoastMe)** | AI humour app: scikit‑learn topic classifier + multi‑provider LLM roasts, web and Android | Creator |
+| **[Movie Recommendation (CineSense)](https://github.com/Beastyy69/MovieRecomendation)** | Local TF‑IDF movie recommendations with optional local Gemma explanations | Creator |
+| **[MultiDiscord Bot](https://github.com/Beastyy69/MultiDiscord-Bot)** | Multi‑purpose Discord bot: music, moderation, giveaways, chatbot | Creator |
+| **[Scheduler AI](https://github.com/joydeep-devx/scheduler.ai)** | AI smart‑classroom management with face‑recognition attendance | Contributor — face recognition |
 
 ---
 
@@ -149,7 +164,7 @@ npm run dev        # http://localhost:5173
     ├── data/                  ← all editable content
     │   ├── profile.js         name, roles, links, photos, story, stats
     │   ├── skills.js          skill domains and levels
-    │   ├── projects.js        projects, filters, mission categories
+    │   ├── projects.js        real projects, verified from GitHub
     │   ├── journey.js         timeline / campaign levels, achievements
     │   ├── certificates.js    certificates
     │   └── navigation.js      nav labels per mode
@@ -161,11 +176,12 @@ npm run dev        # http://localhost:5173
     │   ├── layout/            Navbar, ModeToggle, MusicToggle, ScrollProgress, Footer
     │   ├── sections/          Hero, About, Skills, Projects, Certificates, Journey,
     │   │                      Arcade (Core Run), Contact
-    │   ├── visuals/           NeuralPortrait, NeuralUniverse, ProjectArt, ArcadePortrait,
+    │   ├── projects/          ProjectEcosystem, ProjectAmbient (animated scene per project)
+    │   ├── visuals/           NeuralPortrait, NeuralUniverse, ArcadePortrait,
     │   │                      CharacterSelect, ArcadeStrip, PixelSprite, ModelArchitect
     │   ├── game/              Game Mode pieces:
-    │   │   ├── MissionSelect.jsx   project gallery + briefings
-    │   │   ├── MissionScenes.jsx   one original scene per project
+    │   │   ├── MissionOutpost.jsx  project territory map + mission scenes
+    │   │   ├── OutpostArt.jsx      one original landmark per project
     │   │   ├── AbilityMap.jsx / AtlasArt.jsx   Code Frontier Atlas (skills)
     │   │   ├── CareerMap.jsx       career campaign route
     │   │   ├── WorldPreview.jsx    strip under the navbar
@@ -179,8 +195,8 @@ npm run dev        # http://localhost:5173
         ├── tokens.css         both colour + type systems
         ├── base.css · layout.css · effects.css
         ├── preloader.css · transition.css · world.css
-        ├── one stylesheet per section (hero, about, skills, projects, cases,
-        │   missions, journey, certificates, arcade, runner, contact, profile, portraits)
+        ├── one stylesheet per section (hero, about, skills, ecosystem, outpost,
+        │   journey, certificates, arcade, runner, contact, profile, portraits)
         ├── refine.css         final design layer
         └── fhd.css            Full‑HD (1920 px+) polish, loaded last
 ```
@@ -196,7 +212,7 @@ Both worlds are sets of **CSS variables** in `src/styles/tokens.css`, selected b
 one of two components, e.g.
 
 ```jsx
-{isRetro ? <MissionSelect /> : <CaseStudies />}
+{isRetro ? <MissionOutpost /> : <ProjectEcosystem />}
 ```
 
 ### The world switch keeps your place
@@ -233,16 +249,17 @@ Everything visitors read lives in **`src/data/`** — no component changes neede
 | Name, roles, email, GitHub, LinkedIn, photos | `src/data/profile.js` |
 | Skills and levels | `src/data/skills.js` |
 | Skill connections and "practical use" lines | `LINKS` / `USES` in `src/components/visuals/NeuralUniverse.jsx` |
-| Projects (summary, challenge, metric, stack, links) | `src/data/projects.js` |
+| Projects (summary, highlights, stack, role, links) | `src/data/projects.js` |
 | Certificates | `src/data/certificates.js` |
 | Journey / campaign levels | `src/data/journey.js` |
 | Colours and fonts of either world | `src/styles/tokens.css` |
 
 Tips:
-- A project with `demo: '#'` shows **"Demo in development"** instead of a live link.
-- To use a screenshot for a project, import it in `projects.js` and set `image:` instead of `art:`.
+- GitHub is the source of truth: only add features, stacks and links that the repository itself confirms.
+- `live` is shown only when the repository lists a homepage; every project always links to its repo.
+- The flagship's star count is fetched live from the GitHub API, with a verified snapshot as the fallback.
 
-> **Still to personalise:** the LinkedIn URL, certificate entries, journey dates and project demo links are placeholders.
+> **Still to personalise:** the LinkedIn URL, certificate entries and journey dates are placeholders.
 
 ---
 
@@ -283,7 +300,7 @@ order you would read it:
 | 11–14 | UI building blocks, navbar, music toggle |
 | 15–18 | Backgrounds, cursor, preloader, world‑change transition |
 | 19–23 | Portraits, Hero, About, Skills, Projects (AI/ML) |
-| 24–25 | Game Mode: Mission Select Gallery, atlas and maps |
+| 24–25 | Game Mode: project gallery (since replaced by the Mission Outpost), atlas and maps |
 | 26–27 | Journey, Certificates, *Core Run* |
 | 28 | Contact section and final app assembly |
 
