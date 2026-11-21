@@ -1,0 +1,74 @@
+/* ───────────── Design tokens ─────────────
+   Classic, restrained palettes. No neon, no glow.
+   AI/ML  → deep ink, slate navy, warm ivory, cool gray, muted sage, aged brass, parchment gold.
+   Game   → espresso, burgundy, vintage cream, muted gold, faded red, forest. */
+
+:root,
+[data-mode='ai'] {
+  --bg: #0c1018;
+  --bg-2: #151c29;
+  --surface: rgba(21, 28, 41, 0.72);
+  --surface-solid: #151c29;
+  --surface-hover: rgba(29, 38, 54, 0.88);
+  --text: #f4f0e8; /* warm ivory */
+  --text-muted: #b5bdc9;
+  --text-dim: #8a93a1;
+  --accent: #a7b9a3; /* muted sage */
+  --accent-2: #b89b68; /* aged brass */
+  --accent-3: #d8c59d; /* muted parchment gold (active states) */
+  --accent-4: #b5bdc9; /* soft cool gray */
+  --success: #7fa08f;
+  --on-accent: #0c1018;
+  --border: rgba(244, 240, 232, 0.1);
+  --border-strong: rgba(244, 240, 232, 0.24);
+  --glow: none;
+  --shadow: 0 24px 50px -30px rgba(0, 0, 0, 0.75);
+  --shadow-hover: 0 30px 60px -30px rgba(0, 0, 0, 0.85);
+  --gradient: linear-gradient(120deg, #a7b9a3 0%, #b89b68 100%);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --font-display: 'Sora', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+  --font-pixel: 'JetBrains Mono', monospace;
+  --display-weight: 700;
+  --display-tracking: -0.03em;
+  --display-case: none;
+  --blur: blur(14px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-mode='retro'] {
+  --bg: #1b1512; /* espresso charcoal */
+  --bg-2: #241b17;
+  --surface: rgba(43, 32, 27, 0.92);
+  --surface-solid: #2b201b;
+  --surface-hover: rgba(54, 40, 33, 0.95);
+  --text: #efe4cc; /* vintage cream */
+  --text-muted: #cfc1a3;
+  --text-dim: #9d8f77;
+  --accent: #c9a45c; /* muted gold */
+  --accent-2: #a8473a; /* faded red */
+  --accent-3: #7d9470; /* dusty forest green */
+  --accent-4: #6d7f94; /* desaturated blue */
+  --success: #7d9470;
+  --on-accent: #1b1512;
+  --border: rgba(201, 164, 92, 0.28);
+  --border-strong: rgba(201, 164, 92, 0.6);
+  --glow: none;
+  --shadow: 5px 5px 0 rgba(0, 0, 0, 0.55);
+  --shadow-hover: 7px 7px 0 #6e2a26;
+  --gradient: linear-gradient(90deg, #c9a45c 0%, #a8473a 100%);
+  --radius: 3px;
+  --radius-sm: 2px;
+  --radius-pill: 3px;
+  --font-display: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+  --font-pixel: 'Press Start 2P', 'VT323', monospace;
+  --font-body: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+  --font-mono: 'VT323', 'JetBrains Mono', monospace;
+  --display-weight: 700;
+  --display-tracking: -0.01em;
+  --display-case: uppercase;
+  --blur: none;
+}
