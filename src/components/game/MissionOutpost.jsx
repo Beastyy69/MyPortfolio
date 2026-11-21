@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { AnimatePresence, motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useMode } from '../../context/ModeContext.jsx';
 import { githubUrl, projects } from '../../data/projects.js';
 import useRepoStats from '../../hooks/useRepoStats.js';
@@ -271,6 +271,10 @@ export default function MissionOutpost() {
   useEffect(() => () => clearTimeout(timer.current), []);
 
   // pointer parallax: far mountains drift least, forests more, places most
+  // the map's ambient loops only run while the map is on screen
+  const mapBox = useRef(null);
+  const mapInView = useInView(mapBox, { margin: '120px' });
+  const live = !reduceMotion && mapInView;
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 50, damping: 16 });
@@ -329,7 +333,7 @@ export default function MissionOutpost() {
 
   return (
     <div className="out">
-      <div className="out__map" onPointerMove={onMove} onPointerLeave={resetMove}>
+      <div className="out__map" ref={mapBox} onPointerMove={onMove} onPointerLeave={resetMove}>
         <div className="out__viewport" ref={mapRef}>
           <motion.div
             className="out__cam"
@@ -337,7 +341,7 @@ export default function MissionOutpost() {
             transition={{ duration: 0.75, ease: [0.65, 0, 0.35, 1] }}
           >
             <svg viewBox="0 0 1200 720" className="out__map-svg" aria-label="Project territory map. Each place is a project; select one to open its mission.">
-              <Terrain live={!reduceMotion} far={far} mid={mid} />
+              <Terrain live={live} far={far} mid={mid} />
               <motion.g style={near}>
                 {/* routes from the observatory to every outpost; the hovered / active
                     route becomes more visible and its dashes march */}
@@ -355,7 +359,7 @@ export default function MissionOutpost() {
                           viewport={{ once: true }}
                           transition={{ duration: 0.8, delay: 0.2 + i * 0.1 }}
                         />
-                        {lit && !reduceMotion && (
+                        {lit && live && (
                           <circle r="5" fill={C.gold} stroke={C.ink} strokeWidth="1.5">
                             <animateMotion dur="2.6s" repeatCount="indefinite" path={route(p.id)} keyPoints="1;0" keyTimes="0;1" calcMode="linear" />
                           </circle>
@@ -364,7 +368,7 @@ export default function MissionOutpost() {
                     );
                   })}
                 {/* now and then an envelope travels from the relay station to the observatory */}
-                {!reduceMotion && (
+                {live && (
                   <g>
                     <rect x="-9" y="-6" width="18" height="12" fill={C.paper} stroke={C.ink} strokeWidth="1.5" />
                     <path d="M-9 -6 L0 1 L9 -6" fill="none" stroke={C.ink} strokeWidth="1.5" />
@@ -373,10 +377,10 @@ export default function MissionOutpost() {
                   </g>
                 )}
                 {ordered.map((p) => (
-                  <Place key={p.id} p={p} onOpen={open} live={!reduceMotion} hovered={hovered === p.id} active={focus === p.id} setHovered={setHovered} />
+                  <Place key={p.id} p={p} onOpen={open} live={live} hovered={hovered === p.id} active={focus === p.id} setHovered={setHovered} />
                 ))}
               </motion.g>
-              <Clouds live={!reduceMotion} />
+              <Clouds live={live} />
             </svg>
           </motion.div>
         </div>

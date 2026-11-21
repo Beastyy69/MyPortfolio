@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { motion, useAnimationFrame } from 'framer-motion';
+import { motion, useAnimationFrame, useInView } from 'framer-motion';
 
 /* ─────────────────────────────────────────────────────────────
    Animated ambient backgrounds for the AI/ML Project Ecosystem —
@@ -425,17 +425,20 @@ function Scheduler({ still }) {
 const SCENES = { hologram: Hologram, mailmind: MailMind, rugradar: Radar, roastme: Roast, cinesense: Cinema, discordbot: Hub, scheduler: Scheduler };
 
 export default function ProjectAmbient({ id, still = false, className = '', fit = 'slice' }) {
+  const ref = useRef(null);
+  // pause every loop while the scene is offscreen
+  const inView = useInView(ref, { margin: '120px' });
   const Scene = SCENES[id];
   if (!Scene) return null;
   return (
-    <svg className={`amb ${className}`} viewBox="0 0 600 400" preserveAspectRatio={`xMidYMid ${fit}`} aria-hidden="true">
+    <svg ref={ref} className={`amb ${className}`} viewBox="0 0 600 400" preserveAspectRatio={`xMidYMid ${fit}`} aria-hidden="true">
       <rect width="600" height="400" fill="url(#amb-grid)" />
       <defs>
         <pattern id="amb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
           <path d="M40 0 H0 V40" fill="none" stroke="rgba(244,240,232,0.04)" strokeWidth="1" />
         </pattern>
       </defs>
-      <Scene still={still} />
+      <Scene key={inView ? 'on' : 'off'} still={still || !inView} />
     </svg>
   );
 }

@@ -14,9 +14,17 @@ import googlePython from '../assets/certificates/google-python.webp';
 import oscg from '../assets/certificates/oscg-2026.webp';
 import hackerrank from '../assets/certificates/hackerrank-python.webp';
 
+export const TOPICS = [
+  { id: 'python', label: 'Python' },
+  { id: 'c', label: 'C programming' },
+  { id: 'web', label: 'Web development' },
+  { id: 'community', label: 'Community · open source' },
+];
+
 export const certificates = [
   {
     id: 'hackerrank-python',
+    topic: 'python',
     title: 'Python (Basic)',
     issuer: 'HackerRank',
     kind: 'Skill certification',
@@ -31,6 +39,7 @@ export const certificates = [
   },
   {
     id: 'oscg-2026',
+    topic: 'community',
     title: 'Certificate of Appreciation — Project Admin',
     issuer: 'Open Source Connect Global',
     kind: 'Open‑source contribution',
@@ -44,6 +53,7 @@ export const certificates = [
   },
   {
     id: 'udemy-python-django',
+    topic: 'python',
     title: 'Python And Django Framework For Beginners Complete Course',
     issuer: 'Udemy',
     instructor: 'Horizon Tech',
@@ -58,6 +68,7 @@ export const certificates = [
   },
   {
     id: 'udemy-c-bootcamp',
+    topic: 'c',
     title: '2025 C Programming Bootcamp – The Complete C Language Course',
     issuer: 'Udemy',
     instructor: 'Toppers Bootcamp',
@@ -72,6 +83,7 @@ export const certificates = [
   },
   {
     id: 'meta-html-css',
+    topic: 'web',
     title: 'HTML and CSS in depth',
     issuer: 'Meta · Coursera',
     kind: 'Course certificate',
@@ -85,6 +97,7 @@ export const certificates = [
   },
   {
     id: 'meta-javascript',
+    topic: 'web',
     title: 'Programming with JavaScript',
     issuer: 'Meta · Coursera',
     kind: 'Course certificate',
@@ -98,6 +111,7 @@ export const certificates = [
   },
   {
     id: 'google-python',
+    topic: 'python',
     title: 'Crash Course on Python',
     issuer: 'Google · Coursera',
     kind: 'Course certificate',

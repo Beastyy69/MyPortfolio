@@ -20,6 +20,27 @@
   transition: max-width 0.7s var(--ease), background-color 0.5s var(--ease), border-color 0.5s var(--ease), box-shadow 0.5s var(--ease),
     padding 0.5s var(--ease), border-radius 0.5s var(--ease);
 }
+/* reserved header shelf: once the page scrolls, a soft ink band sits behind
+   the navbar so headings fade out under it instead of colliding with it */
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 104px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(12, 16, 24, 0.97) 0%, rgba(12, 16, 24, 0.9) 55%, rgba(12, 16, 24, 0) 100%);
+  transition: opacity 0.4s var(--ease);
+}
+[data-mode='retro'] .nav::before {
+  background: linear-gradient(180deg, rgba(27, 21, 18, 0.97) 0%, rgba(27, 21, 18, 0.9) 55%, rgba(27, 21, 18, 0) 100%);
+}
+.nav--float::before {
+  opacity: 1;
+}
+.nav__panel {
+  position: relative;
+}
 .nav--float .nav__panel {
   max-width: 1080px;
   background: rgba(22, 26, 36, 0.66);
@@ -539,6 +560,9 @@
 @media (max-width: 640px) {
   .nav {
     padding: 10px 12px 0;
+  }
+  .nav::before {
+    height: 84px;
   }
   .nav__toggle--full {
     display: none;
