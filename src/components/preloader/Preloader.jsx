@@ -48,59 +48,38 @@ const hash = (n) => {
 
 const NAME = profile.name;
 
-/* ── the monogram, in local units (≈ 372 × 330, centred on 0,0) ── */
+/* ── the monogram: Sora ExtraBold (the site's heading font), as outlines ──
+   Glyph units (1000/em, baseline y = 0, caps up to −730) are mapped to local
+   units centred on 0,0. The S follows the H with the headings' −0.05em tracking. */
+const SORA_H =
+  'M724 0L538 0L538-287L260-287L260 0L74 0L74-730L260-730L260-449L538-449L538-730L724-730L724 0Z';
+const SORA_S =
+  'M334 20Q232 20 162.5-12Q93-44 57.5-99.5Q22-155 22-227L202-227Q202-201 216.5-179.5Q231-158 260-146Q289-134 334-134' +
+  'Q373-134 400.5-144Q428-154 442.5-172Q457-190 457-215Q457-247 430-264.5Q403-282 339-287L292-291Q179-301 112-362' +
+  'Q45-423 45-524Q45-596 78.5-647Q112-698 173-725Q234-752 317-752Q407-752 469.5-722Q532-692 565-637.5Q598-583 598-511' +
+  'L418-511Q418-535 406-555Q394-575 371.5-586.5Q349-598 317-598Q287-598 266.5-588.5Q246-579 235.5-562Q225-545 225-524' +
+  'Q225-496 244-476Q263-456 310-452L357-448Q439-441 502-412.5Q565-384 601-335Q637-286 637-215Q637-144 600.5-91' +
+  'Q564-38 496.5-9Q429 20 334 20Z';
+const S_X = 798 - 50; // H advance + tracking
+const GK = 0.4; // glyph unit → local unit
+const GCX = (74 + S_X + 637) / 2; // ink centre (x)
+const GCY = (-752 + 20) / 2; // ink centre (y)
+const gx = (u) => +((u - GCX) * GK).toFixed(1);
+const gy = (v) => +((v - GCY) * GK).toFixed(1);
+const GLYPHS = `translate(${(-GCX * GK).toFixed(2)} ${(-GCY * GK).toFixed(2)}) scale(${GK})`;
 
-// S centreline (Catmull–Rom through these stations)
+// H strokes (glyph units → local)
+const H_L = gx((74 + 260) / 2); // left stem centre
+const H_R = gx((538 + 724) / 2); // right stem centre
+const H_TOP = gy(-730);
+const H_BOT = gy(0);
+const H_BAR = gy((-449 - 287) / 2); // crossbar centre
+// S spine stations (glyph units, along the stroke centre, top terminal → bottom terminal)
 const S_PTS = [
-  [168, -112], [132, -146], [78, -150], [36, -122], [32, -76], [66, -40], [110, -14],
-  [150, 16], [174, 62], [162, 114], [118, 148], [62, 150], [18, 120],
-];
-// H: two pillars and a bridge with a gentle rise‑to‑fall slant that echoes the S
-const PILLAR_W = 52;
-const PILLARS = [
-  { x: -180, y: -150, w: PILLAR_W, h: 300 },
-  { x: -60, y: -150, w: PILLAR_W, h: 300 },
-];
-const BRIDGE = 'M-132 -24 L-56 -10 L-56 24 L-132 10 Z';
+  [508, -528], [452, -650], [317, -676], [188, -642], [135, -524], [205, -428], [330, -370],
+  [468, -318], [547, -215], [502, -98], [334, -57], [188, -92], [112, -218],
+].map(([u, v]) => [gx(u + S_X), gy(v)]);
 
-function crPoint(p0, p1, p2, p3, t) {
-  const t2 = t * t;
-  const t3 = t2 * t;
-  const f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
-  const g = (a, b, c, d) => 0.5 * (-a + c + 2 * (2 * a - 5 * b + 4 * c - d) * t + 3 * (-a + 3 * b - 3 * c + d) * t2);
-  return [f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1]), g(p0[0], p1[0], p2[0], p3[0]), g(p0[1], p1[1], p2[1], p3[1])];
-}
-
-// variable-width S outline: thick verticals and spine, finer horizontals
-function buildS() {
-  const left = [];
-  const right = [];
-  const n = S_PTS.length;
-  const STEPS = 14;
-  for (let i = 0; i < n - 1; i++) {
-    const p0 = S_PTS[i - 1] ?? S_PTS[i];
-    const p1 = S_PTS[i];
-    const p2 = S_PTS[i + 1];
-    const p3 = S_PTS[i + 2] ?? p2;
-    for (let k = 0; k <= STEPS; k++) {
-      if (i > 0 && k === 0) continue;
-      const t = k / STEPS;
-      const [x, y, dx, dy] = crPoint(p0, p1, p2, p3, t);
-      const len = Math.hypot(dx, dy) || 1;
-      const u = (i + t) / (n - 1);
-      const vertical = Math.pow(Math.abs(dy / len), 0.85);
-      const spine = Math.exp(-Math.pow((u - 0.5) / 0.12, 2));
-      const taper = 0.84 + 0.16 * Math.min(1, Math.min(u, 1 - u) / 0.08);
-      const w = (24 + 32 * vertical + 9 * spine) * taper;
-      const nx = (-dy / len) * (w / 2);
-      const ny = (dx / len) * (w / 2);
-      left.push([x + nx, y + ny]);
-      right.push([x - nx, y - ny]);
-    }
-  }
-  const pts = [...left, ...right.reverse()];
-  return `M${pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L')} Z`;
-}
 function smoothPath(pts) {
   let d = `M${pts[0][0]} ${pts[0][1]}`;
   for (let i = 0; i < pts.length - 1; i++) {
@@ -112,27 +91,26 @@ function smoothPath(pts) {
   }
   return d;
 }
-const S_SHAPE = buildS();
 const S_LINE = smoothPath(S_PTS);
-// visual centre of the mark (measured: H −180…−8, S reaches ≈ 203; ≈ ±162 tall)
-const MARK_CX = 11.5;
-const MARK_W = 372;
-const MARK_H = 330;
+// size of the mark in local units (ink box), centred on 0,0
+const MARK_CX = 0;
+const MARK_W = (S_X + 637 - 74) * GK;
+const MARK_H = (752 + 20) * GK;
 
-// skeleton strokes, in the order they thicken (left → right)
+// skeleton strokes, in the order they thicken (left → right); widths cover the Sora strokes
 const SKELETON = [
-  { id: 'hl', d: 'M-154 -150 L-154 150', w: 66, t: [0.67, 0.73] },
-  { id: 'hb', d: 'M-140 -8.5 L-48 8.5', w: 58, t: [0.69, 0.75] },
-  { id: 'hr', d: 'M-34 -150 L-34 150', w: 66, t: [0.71, 0.77] },
-  { id: 's', d: S_LINE, w: 84, t: [0.73, 0.82], along: true },
+  { id: 'hl', d: `M${H_L} ${H_TOP} L${H_L} ${H_BOT}`, w: 84, t: [0.67, 0.73] },
+  { id: 'hb', d: `M${H_L} ${H_BAR} L${H_R} ${H_BAR}`, w: 74, t: [0.69, 0.75] },
+  { id: 'hr', d: `M${H_R} ${H_TOP} L${H_R} ${H_BOT}`, w: 84, t: [0.71, 0.77] },
+  { id: 's', d: S_LINE, w: 92, t: [0.73, 0.82], along: true },
 ];
 
 // 24 anchors on the skeleton — where the scattered nodes land
 const ANCHORS = [
-  [-154, -150], [-154, -50], [-154, 50], [-154, 150], //   0–3   left pillar
-  [-34, -150], [-34, -50], [-34, 50], [-34, 150], //       4–7   right pillar
-  [-128, -6], [-94, 0], [-60, 6], //                    8–10  bridge (joins + middle)
-  ...S_PTS, //                                             11–23 the S
+  [H_L, H_TOP], [H_L, gy(-487)], [H_L, gy(-243)], [H_L, H_BOT], //   0–3   left stem
+  [H_R, H_TOP], [H_R, gy(-487)], [H_R, gy(-243)], [H_R, H_BOT], //   4–7   right stem
+  [gx(285), H_BAR], [gx(399), H_BAR], [gx(513), H_BAR], //            8–10  crossbar (joins + middle)
+  ...S_PTS, //                                                         11–23 the S
 ];
 /* 12 named identity nodes form the HS's key points (corners, joins, curve
    stations); 12 tiny unnamed particles fill the remaining anchors. */
@@ -161,7 +139,7 @@ function useViewport() {
 
 // size of the mark on screen: 280–420px wide on desktop, ~62% of a phone
 function markScale(W, H) {
-  const target = W < 700 ? W * 0.62 : Math.min(420, Math.max(280, W * 0.21));
+  const target = W < 700 ? W * 0.72 : Math.min(520, Math.max(340, W * 0.27));
   return Math.min(target / MARK_W, (H * 0.36) / MARK_H);
 }
 
@@ -339,10 +317,10 @@ function Film({ p, still }) {
         <motion.g exit={{ scale: 1.08, opacity: 0, transition: { duration: 0.7, ease: [0.65, 0, 0.35, 1] } }}>
           <g className={`sig__mono ${breathing ? 'is-breathing' : ''}`}>
             <defs>
-              <filter id="hs-depth" filterUnits="userSpaceOnUse" x="-260" y="-240" width="520" height="500">
+              <filter id="hs-depth" filterUnits="userSpaceOnUse" x="-330" y="-240" width="660" height="500">
                 <feDropShadow dx="0" dy="12" stdDeviation="14" floodColor="#04060a" floodOpacity="0.6" />
               </filter>
-              <filter id="hs-grain" filterUnits="userSpaceOnUse" x="-220" y="-190" width="440" height="380">
+              <filter id="hs-grain" filterUnits="userSpaceOnUse" x="-300" y="-200" width="600" height="400">
                 <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n" />
                 <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.36  0 0 0 0 0.28  0 0 0 0.2 0" result="g" />
                 <feComposite in="g" in2="SourceGraphic" operator="in" result="gi" />
@@ -356,7 +334,7 @@ function Film({ p, still }) {
                 <stop offset="1" stopColor="#e3dac8" />
               </linearGradient>
               {/* the skeleton thickens into the letters: strokes in a mask over the solid forms */}
-              <mask id="hs-form" maskUnits="userSpaceOnUse" x="-260" y="-240" width="520" height="500">
+              <mask id="hs-form" maskUnits="userSpaceOnUse" x="-330" y="-240" width="660" height="500">
                 {SKELETON.map((k) => {
                   const t = ease(seg(p, k.t[0], k.t[1]));
                   if (t <= 0) return null;
@@ -391,11 +369,10 @@ function Film({ p, still }) {
             {/* solid letters, revealed by the thickening skeleton */}
             <g filter="url(#hs-depth)">
               <g className="sig__letters" mask="url(#hs-form)" filter="url(#hs-grain)">
-                {PILLARS.map((r, i) => (
-                  <rect key={i} x={r.x} y={r.y} width={r.w} height={r.h} rx="7" className="sig__letter" />
-                ))}
-                <path d={BRIDGE} className="sig__letter" />
-                <path d={S_SHAPE} className="sig__letter" />
+                <g transform={GLYPHS}>
+                  <path d={SORA_H} className="sig__letter" />
+                  <path d={SORA_S} transform={`translate(${S_X} 0)`} className="sig__letter" />
+                </g>
               </g>
             </g>
 
@@ -409,7 +386,7 @@ function Film({ p, still }) {
                     <circle cx={x} cy={y} r="3.4" className="sig__join-dot" />
                   </g>
                 ))}
-                <rect x="-158" y="-138" width="8" height="8" className="sig__join-sq" />
+                <rect x={gx(74) + 7} y={H_TOP + 7} width="8" height="8" className="sig__join-sq" />
               </g>
             )}
           </g>
@@ -460,7 +437,7 @@ function Wordmark({ p }) {
   return (
     <motion.div className="sig__word" exit={{ y: -30, opacity: 0, transition: { duration: 0.5, ease: [0.65, 0, 0.35, 1] } }}>
       <p className="sig__name" style={{ opacity: name, transform: `translateY(${(1 - name) * 12}px)` }}>
-        {NAME.toUpperCase()}
+        {NAME}
       </p>
       <p className="sig__role" style={{ opacity: role, transform: `translateY(${(1 - role) * 8}px)` }}>
         AIML Developer <i>·</i> Backend Engineer <i>·</i> Builder
