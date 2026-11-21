@@ -1,0 +1,527 @@
+/* ───────────── Fixed backdrop ───────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.backdrop > * {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.8s var(--ease);
+}
+.backdrop__canvas {
+  opacity: 0.7;
+}
+.backdrop__glow {
+  background: radial-gradient(60% 50% at 80% 0%, rgba(167, 185, 163, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 0% 35%, rgba(184, 155, 104, 0.18), transparent 70%),
+    radial-gradient(40% 40% at 60% 100%, rgba(167, 185, 163, 0.1), transparent 70%);
+}
+.backdrop__grid {
+  background-image: linear-gradient(rgba(244, 240, 232, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 240, 232, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+}
+.backdrop__floor,
+.backdrop__scanlines {
+  opacity: 0;
+}
+.backdrop__vignette {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+[data-mode='retro'] .backdrop__glow {
+  background: radial-gradient(50% 40% at 85% 10%, rgba(168, 71, 58, 0.18), transparent 70%),
+    radial-gradient(45% 40% at 5% 40%, rgba(201, 164, 92, 0.12), transparent 70%),
+    radial-gradient(60% 40% at 50% 110%, rgba(107, 90, 122, 0.25), transparent 70%);
+}
+[data-mode='retro'] .backdrop__grid {
+  opacity: 0;
+}
+[data-mode='retro'] .backdrop__canvas {
+  opacity: 0.85;
+}
+[data-mode='retro'] .backdrop__floor {
+  opacity: 0.35;
+  inset: auto -50% 0 -50%;
+  height: 46vh;
+  transform: perspective(380px) rotateX(62deg);
+  transform-origin: 50% 100%;
+  background-image: linear-gradient(rgba(168, 71, 58, 0.7) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(201, 164, 92, 0.55) 2px, transparent 2px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  animation: floor-run 2.4s linear infinite;
+}
+@keyframes floor-run {
+  to {
+    background-position: 0 56px;
+  }
+}
+[data-mode='retro'] .backdrop__scanlines {
+  opacity: 1;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+[data-mode='retro'] .backdrop__vignette {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+/* ───────────── Mode transition ───────────── */
+.wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  overflow: hidden;
+  pointer-events: all;
+}
+.wipe__grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-auto-rows: 1fr;
+}
+.wipe__grid span {
+  display: block;
+}
+.wipe__crt {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: radial-gradient(ellipse at center, #fff 0%, #e8d9b0 30%, rgba(201, 164, 92, 0.4) 60%, transparent 80%);
+  
+}
+.wipe__panel {
+  position: absolute;
+  inset: 0;
+}
+.wipe__beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #a7b9a3, #b89b68, #a7b9a3, transparent);
+  box-shadow: none;
+}
+.wipe__label {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 20px;
+}
+.wipe__label--retro strong {
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  font-size: clamp(1rem, 3.4vw, 1.8rem);
+  color: #fff;
+  background: #1b1512;
+  padding: 16px 20px;
+  text-shadow: 3px 3px 0 #a8473a;
+  box-shadow: 0 0 0 4px #c9a45c, 10px 10px 0 4px #000;
+  animation: blink 0.4s steps(1) infinite;
+}
+.wipe__label--retro small {
+  font-family: 'VT323', monospace;
+  font-size: 1.4rem;
+  color: #7d9470;
+  background: #1b1512;
+  padding: 2px 10px;
+}
+.wipe__label--ai strong {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(1.6rem, 4.5vw, 3rem);
+  letter-spacing: -0.04em;
+  background: linear-gradient(120deg, #fff, #aab3c6 60%, #a9a6c4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wipe__label--ai ul {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #a6a29a;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+.wipe__label--ai b {
+  color: #7fa08f;
+  font-weight: 500;
+}
+.wipe__net {
+  width: 150px;
+  overflow: visible;
+}
+.wipe__net line {
+  stroke: #a7b9a3;
+  stroke-width: 1.2;
+}
+.wipe__net circle {
+  fill: #8a88aa;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ───────────── Cursor ───────────── */
+html.has-cursor,
+html.has-cursor a,
+html.has-cursor button,
+html.has-cursor [role='button'],
+html.has-cursor label {
+  cursor: none;
+}
+.cursor {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.cursor.is-hidden {
+  opacity: 0;
+}
+.cursor__dot,
+.cursor__ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  translate: -50% -50%;
+}
+.cursor__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+}
+.cursor__ring {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 240, 232, 0.55);
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.cursor__ring.is-hover {
+  border-color: var(--accent);
+  background: rgba(167, 185, 163, 0.1);
+}
+.cursor__ring.has-label {
+  background: var(--accent);
+  border-color: transparent;
+}
+.cursor__ring span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+}
+.cursor--retro .cursor__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  background: var(--accent-3);
+  mix-blend-mode: normal;
+}
+.cursor--retro .cursor__ring {
+  border-radius: 0;
+  border: 2px solid var(--accent);
+  box-shadow: 3px 3px 0 var(--accent-2);
+}
+.cursor--retro .cursor__ring.is-hover {
+  background: rgba(201, 164, 92, 0.12);
+}
+.cursor--retro .cursor__ring.has-label {
+  background: var(--accent-4);
+  border-color: #000;
+}
+.cursor--retro .cursor__ring span {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #1a0b00;
+}
+
+/* ───────────── Toasts ───────────── */
+.toasts {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 950;
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 12px 12px;
+  max-width: 340px;
+  border-radius: 14px;
+  background: rgba(26, 30, 42, 0.92);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(14px);
+}
+.toast__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: var(--accent);
+  background: rgba(167, 185, 163, 0.14);
+  flex: none;
+}
+.toast strong {
+  display: block;
+  font-size: 0.9rem;
+}
+.toast small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+[data-mode='retro'] .toast {
+  border-radius: 0;
+  background: #000;
+  border: 2px solid var(--accent-4);
+  box-shadow: 6px 6px 0 var(--accent-2);
+}
+[data-mode='retro'] .toast__icon {
+  border-radius: 0;
+  background: #2b201b;
+}
+[data-mode='retro'] .toast strong {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  line-height: 1.6;
+  color: var(--accent-4);
+}
+[data-mode='retro'] .toast small {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+}
+
+/* CRT frame shared by hero / about / preloader */
+.crt {
+  position: relative;
+  padding: 18px;
+  background: linear-gradient(145deg, #3a2a22, #241b17);
+  border: 3px solid #000;
+  border-radius: 22px;
+  box-shadow: 0 0 0 3px #4a3a2c, 10px 10px 0 #000;
+}
+.crt__screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px / 22px;
+  background: #000;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+}
+.crt__screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.32) 0 2px, transparent 2px 4px);
+}
+.crt__screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.65) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 30%);
+  animation: crt-flicker 6s steps(1) infinite;
+}
+@keyframes crt-flicker {
+  0%,
+  96%,
+  100% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.82;
+  }
+  98% {
+    opacity: 0.95;
+  }
+}
+
+/* ───────────── World layers (FHD parallax environment) ───────────── */
+.world {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.world__layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.world__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.world__tall[data-m='1.6'] {
+  height: 160vh;
+}
+.world__tall[data-m='2.4'] {
+  height: 240vh;
+}
+.world__tall[data-m='3'] {
+  height: 300vh;
+}
+
+/* AI world */
+.world__sky--ai {
+  background: radial-gradient(90% 60% at 70% 0%, #1a1f30 0%, transparent 70%),
+    linear-gradient(180deg, #0c0f17 0%, #111522 50%, #131622 100%);
+}
+.world__topo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: topo-drift 80s ease-in-out infinite alternate;
+}
+.world__topo path {
+  fill: none;
+  stroke: rgba(244, 240, 232, 0.055);
+  stroke-width: 1.2;
+}
+.world__topo path.is-major {
+  stroke: rgba(244, 240, 232, 0.1);
+}
+@keyframes topo-drift {
+  to {
+    transform: translate(-60px, 30px) rotate(1.4deg) scale(1.03);
+  }
+}
+.world__terrain path {
+  fill: none;
+  stroke: rgba(167, 185, 163, 0.2);
+  stroke-width: 1;
+}
+.world__terrain path.is-col {
+  stroke: rgba(167, 185, 163, 0.07);
+}
+.world__peak {
+  fill: rgba(216, 197, 157, 0.4);
+  animation: world-pulse 7s ease-in-out infinite;
+}
+.world__stream-base {
+  fill: none;
+  stroke-width: 1.2;
+  stroke: rgba(167, 185, 163, 0.07);
+}
+.world__stream-flow {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 34 966;
+  stroke: rgba(167, 185, 163, 0.4);
+  animation: stream-flow 40s linear infinite;
+}
+.world__streams .is-amber .world__stream-flow {
+  stroke: rgba(216, 197, 157, 0.42);
+}
+.world__streams .is-indigo .world__stream-flow {
+  stroke: rgba(184, 155, 104, 0.45);
+}
+.world__streams .is-amber .world__stream-base {
+  stroke: rgba(216, 197, 157, 0.06);
+}
+@keyframes stream-flow {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.world__synapse {
+  fill: rgba(244, 240, 232, 0.3);
+  animation: world-pulse 6s ease-in-out infinite;
+}
+@keyframes world-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Game world: Code Frontier */
+.world--retro::after {
+  /* readability scrim: the world stays atmospheric, never louder than text */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(27, 21, 18, 0.62) 0%, rgba(27, 21, 18, 0.38) 55%, rgba(27, 21, 18, 0.2) 100%);
+}
+.world__sky--day {
+  background: linear-gradient(180deg, #252c33 0%, #39424a 40%, #5b5a4c 75%, #6d6248 100%);
+}
+.world__sky--dusk {
+  opacity: 0;
+  background: linear-gradient(180deg, #1c1820 0%, #2e2329 40%, #4d332c 75%, #6a4630 100%);
+  will-change: opacity;
+}
+.world__clouds .world__svg {
+  animation: clouds-drift 70s ease-in-out infinite alternate;
+}
+@keyframes clouds-drift {
+  to {
+    transform: translate3d(-5%, 0, 0);
+  }
+}
+.world__smoke {
+  animation: smoke-rise 6s steps(6) infinite;
+}
+@keyframes smoke-rise {
+  to {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+.world__blink {
+  animation: world-blink 2.4s steps(2) infinite;
+}
+.world__beacon {
+  animation: world-blink 1.6s steps(2) infinite;
+}
+@keyframes world-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+.world__near {
+  opacity: 0.92;
+}
+
+.world.is-still *,
+.world.is-still .world__svg {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .world * {
+    animation: none !important;
+  }
+}
