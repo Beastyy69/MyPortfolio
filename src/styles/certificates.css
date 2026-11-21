@@ -737,3 +737,10 @@
     transition: none;
   }
 }
+
+/* comfortable touch targets on phones */
+@media (max-width: 760px) {
+  .plaque {
+    min-height: 38px;
+  }
+}
