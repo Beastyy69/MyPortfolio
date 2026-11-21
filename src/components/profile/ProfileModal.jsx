@@ -71,14 +71,14 @@ function DeveloperDesk({ close, photoId }) {
           </section>
         </div>
         <div className="desk__links">
+          <a href={profile.resume} download className="btn btn--primary desk__cv">
+            <Icon name="download" size={16} /> Download CV
+          </a>
           {SOCIALS.filter((x) => x.id !== 'cv').map((s) => (
             <a key={s.id} href={s.href} {...ext(s.href)} className="desk__link" aria-label={s.label}>
               <Icon name={s.icon} size={18} /> {s.label}
             </a>
           ))}
-          <a href={profile.resume} download className="btn btn--primary desk__cv">
-            <Icon name="download" size={16} /> Download CV
-          </a>
         </div>
       </div>
       <button type="button" className="modal__close" onClick={close} aria-label="Close profile">
@@ -265,6 +265,7 @@ export default function ProfileModal() {
         <motion.div
           className="modal"
           onClick={close}
+          data-lenis-prevent
           initial={photoId ? { opacity: 0 } : { clipPath: `circle(0px at ${at})` }}
           animate={photoId ? { opacity: 1 } : { clipPath: `circle(150% at ${at})` }}
           exit={photoId ? { opacity: 0 } : { clipPath: `circle(0px at ${at})` }}
@@ -276,6 +277,7 @@ export default function ProfileModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="profile-title"
+            data-lenis-prevent
             onClick={(e) => e.stopPropagation()}
             initial={photoId ? { opacity: 1, y: 0 } : { opacity: 0, y: 30, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1, transition: { delay: photoId ? 0 : 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
