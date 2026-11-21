@@ -417,11 +417,15 @@
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+.corerun__screen {
+  overflow: hidden; /* nothing in the game screen may spill over the controls */
+}
 .corerun__overlay {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex; /* flex (not grid) so the card's max-height resolves and it scrolls inside */
+  align-items: center;
+  justify-content: center;
   padding: 12px;
   background: rgba(27, 21, 18, 0.62);
 }
@@ -555,6 +559,25 @@
 @media (pointer: coarse), (max-width: 760px) {
   .corerun__touch {
     display: flex;
+    margin-top: 12px;
+  }
+  /* keyboard instructions are irrelevant with the touch pad; keep the card short */
+  .corerun__rules {
+    display: none;
+  }
+}
+/* on small screens the game screen is short: keep only the title and the
+   actions in the card, so its buttons are always visible without scrolling */
+@media (max-width: 760px) {
+  .corerun__card {
+    padding: 12px 14px;
+  }
+  .corerun__card > p,
+  .corerun__card .corerun__kicker {
+    display: none;
+  }
+  .corerun__card h3 {
+    margin-bottom: 8px;
   }
 }
 @media (max-width: 640px) {
@@ -1618,19 +1641,20 @@
 .cmap__post {
   position: absolute;
   left: -2px;
-  top: -64px;
+  top: -112px; /* tall enough that every sign clears the buildings */
   width: 4px;
-  height: 64px;
+  height: 112px;
   background: #2a2119;
 }
 .cmap__sign {
   position: absolute;
   left: 50%;
-  top: -118px;
+  top: -168px;
   translate: -50% 0;
   display: grid;
   justify-items: center;
   padding: 6px 12px 7px;
+  z-index: 2;
   white-space: nowrap;
   background: #6e5232;
   color: #efe4cc;
@@ -1664,10 +1688,24 @@
 }
 .cmap__player {
   position: absolute;
+  z-index: 3;
   width: 36px;
   translate: -50% -100%;
+  margin-top: -2px; /* feet rest on the trail surface */
   pointer-events: none;
   filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.35));
+}
+.cmap__body {
+  transform-origin: 50% 100%;
+}
+.cmap__quest {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 400;
+  color: #e9dcc0;
 }
 .cmap__sprite {
   display: block;

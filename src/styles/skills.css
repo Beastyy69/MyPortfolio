@@ -660,7 +660,9 @@
   display: none;
 }
 
-@media (max-width: 760px) {
+/* below ~1000px the full network gets too dense (labels collide with
+   nodes), so tablets and phones use the one-domain-at-a-time layout */
+@media (max-width: 1000px) {
   .nu__stage {
     display: none;
   }

@@ -5,12 +5,23 @@ import { journey } from '../../data/journey.js';
 import { HERO, SpriteSVG } from './sprites.jsx';
 
 /* ─────────────────────────────────────────────────────────────
-   Career Campaign Map — Level 6 of Code Frontier.
-   A side‑view illustrated panorama (2400 × 720 units) in three
-   parallax layers. Each career stage is a real place on one winding
-   road: academy → workshop & Python valley → AI observatory →
-   backend outpost & deployment tower → today's camp. Selecting a
-   stop pans the camera there; the map can also be dragged.
+   Campaign Trail — the learning journey as a side‑view adventure map
+   (2400 × 720 units, three parallax layers).
+
+   One trail joins every stage:
+     2020  Foundation Village          (first quest)
+     2024  Algorithm Mountain          (the C programming trail climbs it)
+           …a timber bridge over the river…
+     2025  Builder Workshop            (React Town · Unreal Garage)
+     2026  AI Observatory · Backend Outpost
+
+   Movement is logical: the explorer follows the SAME curve the road and
+   bridge are drawn from (arc‑length sampled), so the feet always stay on
+   the visible trail. Height follows the terrain; climbs are slower than
+   descents; the sprite faces its direction of travel and leans a little
+   with the slope; the walk cycle only plays while travelling; every
+   building's door sits on the trail, so the explorer stops at the
+   entrance instead of walking through walls.
    ───────────────────────────────────────────────────────────── */
 
 const MW = 2400;
@@ -29,35 +40,75 @@ const C = {
   paper: '#d8c9a3',
   brick: '#8a3d33',
   gold: '#b8954a',
-  blue: '#5d6f82',
+  water: '#5d6f82',
   olive: '#5d6b3f',
   stone: '#bfae88',
+  wood: '#6e5232',
 };
 
-export const STOPS = [
-  { place: 'Learning Academy', x: 290, y: 520 },
-  { place: 'Python Valley', x: 760, y: 586 },
-  { place: 'AI Observatory', x: 1240, y: 322 },
-  { place: 'Backend Outpost', x: 1700, y: 476 },
-  { place: 'Player Camp', x: 2150, y: 516 },
+// the trail (road surface); the bridge deck spans 1260 → 1420
+const ROAD = [
+  [-40, 560], [150, 552], [300, 545], [430, 548], [540, 528], [640, 474], [740, 404], [830, 346], [920, 318],
+  [1000, 330], [1080, 384], [1160, 452], [1260, 500], [1340, 500], [1420, 500], [1500, 507], [1650, 514],
+  [1770, 504], [1870, 466], [1970, 420], [2060, 394], [2140, 388], [2260, 398], [2440, 412],
 ];
-
-// terrain elevation the road follows
-const RIDGE = [
-  [0, 560], [150, 540], [290, 520], [440, 548], [600, 566], [700, 600], [760, 586], [830, 600], [960, 540],
-  [1100, 420], [1240, 322], [1380, 400], [1520, 470], [1700, 476], [1880, 500], [2020, 512], [2150, 516], [2300, 530], [2400, 540],
+// the ground follows the road, except where it drops into the river bed
+const GROUND = [
+  [-40, 560], [150, 552], [300, 545], [430, 548], [540, 528], [640, 474], [740, 404], [830, 346], [920, 318],
+  [1000, 330], [1080, 384], [1160, 452], [1250, 504], [1280, 560], [1310, 632], [1370, 636], [1400, 566], [1430, 508],
+  [1500, 507], [1650, 514], [1770, 504], [1870, 466], [1970, 420], [2060, 394], [2140, 388], [2260, 398], [2440, 412],
 ];
+const BRIDGE = [1250, 1432];
+// where each stage stands on the trail (x); y comes from the trail itself
+const STOP_X = [300, 920, 1650, 2140];
 
-function smooth(points) {
-  let d = `M${points[0][0]} ${points[0][1]}`;
+function crSample(points, perSeg = 40) {
+  const out = [];
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[i - 1] ?? points[i];
     const p1 = points[i];
     const p2 = points[i + 1];
     const p3 = points[i + 2] ?? p2;
-    d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0]} ${p2[1]}`;
+    for (let k = 0; k < perSeg; k++) {
+      const t = k / perSeg;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      const f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+      out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+    }
   }
-  return d;
+  out.push(points[points.length - 1]);
+  return out;
+}
+const pathOf = (pts) => `M${pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L')}`;
+
+// arc‑length table of the trail, so travel speed is even along the curve
+function buildTrail() {
+  const pts = crSample(ROAD);
+  const len = [0];
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const at = (s) => {
+    const L = Math.max(0, Math.min(len[len.length - 1], s));
+    let lo = 0;
+    let hi = len.length - 1;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (len[mid] < L) lo = mid;
+      else hi = mid;
+    }
+    const k = (L - len[lo]) / (len[hi] - len[lo] || 1);
+    const [x0, y0] = pts[lo];
+    const [x1, y1] = pts[hi];
+    return { x: x0 + (x1 - x0) * k, y: y0 + (y1 - y0) * k, slope: (y1 - y0) / (x1 - x0 || 1) };
+  };
+  const sAtX = (x) => {
+    let best = 0;
+    pts.forEach((p, i) => {
+      if (Math.abs(p[0] - x) < Math.abs(pts[best][0] - x)) best = i;
+    });
+    return len[best];
+  };
+  return { road: pathOf(pts), at, sAtX };
 }
 
 function Pine({ x, y, s = 1, fill = C.hillDark }) {
@@ -69,230 +120,249 @@ function Pine({ x, y, s = 1, fill = C.hillDark }) {
   );
 }
 
-/* ───────────── layers ───────────── */
+/* ───────────── background layers (behind the trail, never crossed) ───────────── */
 function FarLayer() {
-  const d = 'M0 470 L120 360 L200 410 L320 290 L420 380 L560 300 L700 400 L840 320 L980 250 L1120 330 L1260 210 L1400 320 L1560 260 L1700 360 L1860 280 L2000 370 L2160 300 L2300 380 L2400 340 V720 H0 Z';
+  const d = 'M0 470 L120 360 L200 410 L320 300 L420 380 L560 290 L700 330 L840 210 L980 170 L1120 260 L1260 300 L1400 330 L1560 280 L1700 360 L1860 280 L2000 320 L2160 250 L2300 330 L2400 300 V720 H0 Z';
   return (
     <g>
       <path d={d} fill={C.far} opacity="0.75" />
-      <path d="M320 290 l-26 30 l14 -4 l12 10 l10 -12 l14 4 Z M980 250 l-22 28 l12 -3 l10 9 l10 -10 l12 3 Z M1260 210 l-28 36 l14 -4 l14 12 l12 -12 l16 4 Z M1860 280 l-22 26 l12 -3 l10 8 l10 -9 l12 3 Z" fill={C.snow} opacity="0.75" />
-      <path d="M0 520 Q300 440 600 500 T1200 470 T1800 500 T2400 470 V720 H0 Z" fill={C.farDark} opacity="0.85" />
+      <path d="M840 210 l-24 28 l12 -3 l10 9 l10 -10 l12 3 Z M980 170 l-28 34 l14 -4 l14 12 l12 -12 l16 4 Z M2160 250 l-22 26 l12 -3 l10 8 l10 -9 l12 3 Z" fill={C.snow} opacity="0.75" />
+      <path d="M0 520 Q300 460 600 500 T1200 480 T1800 500 T2400 470 V720 H0 Z" fill={C.farDark} opacity="0.8" />
     </g>
   );
 }
-
 function MidLayer() {
-  const pines = [80, 140, 420, 470, 900, 960, 1010, 1420, 1480, 1990, 2050, 2280, 2340];
+  const pines = [80, 140, 470, 1180, 1230, 1480, 1540, 1990, 2050, 2280, 2340];
   return (
     <g>
-      <path d="M0 590 Q200 520 420 560 T860 540 T1300 520 T1760 560 T2200 540 T2400 560 V720 H0 Z" fill={C.hill} />
-      {/* ruined arch between valley and observatory */}
-      <g transform="translate(1020 470)" fill={C.stone} stroke={INK} strokeWidth="1.6">
-        <path d="M0 70 V10 h14 v60 Z M46 70 V24 h14 v46 Z" />
-        <path d="M-4 10 Q30 -24 64 24 L52 28 Q30 -6 10 14 Z" />
-      </g>
+      <path d="M0 600 Q200 540 420 570 T860 560 T1300 560 T1760 570 T2200 540 T2400 560 V720 H0 Z" fill={C.hill} opacity="0.85" />
       {pines.map((x, i) => (
-        <Pine key={x} x={x} y={560 + (i % 3) * 8} s={0.75 + (i % 2) * 0.2} fill={C.hillDark} />
+        <Pine key={x} x={x} y={570 + (i % 3) * 8} s={0.7 + (i % 2) * 0.2} />
       ))}
     </g>
   );
 }
 
-function Academy() {
+/* ───────────── places (doors on the trail) ───────────── */
+function Village({ y }) {
+  // 2020 — Foundation Village: small houses and a community notice board
   return (
-    <g transform="translate(200 410)">
-      <path d="M-14 110 H194 V118 H-14 Z M-6 102 H186 V110 H-6 Z" fill={C.stone} stroke={INK} strokeWidth="1.6" />
-      <rect x="6" y="46" width="168" height="56" fill="#d4c39d" stroke={INK} strokeWidth="1.8" />
-      {[18, 52, 86, 120, 154].map((x) => (
-        <g key={x}>
-          <rect x={x} y="50" width="10" height="52" fill="#e3d5b5" stroke={INK} strokeWidth="1.3" />
-        </g>
-      ))}
-      <path d="M-4 46 L90 4 L184 46 Z" fill="#c4ad84" stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />
-      <circle cx="90" cy="30" r="8" fill="none" stroke={INK} strokeWidth="1.4" />
-      <path d="M90 4 V-26" stroke={INK} strokeWidth="2" />
-      <path className="cm-anim cm-flag" d="M90 -26 L114 -20 L90 -13 Z" fill={C.brick} stroke={INK} strokeWidth="1.2" />
-      <rect x="78" y="74" width="24" height="28" fill={INK} opacity="0.8" />
-    </g>
-  );
-}
-
-function Workshop() {
-  return (
-    <g transform="translate(520 470)">
-      <rect x="0" y="40" width="110" height="60" fill="#cbb991" stroke={INK} strokeWidth="1.8" />
-      <path d="M0 40 l22 -22 v22 l22 -22 v22 l22 -22 v22 l22 -22 v22 l22 -22 v22" fill="#a68f62" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" />
-      <rect x="90" y="-8" width="14" height="30" fill={C.brick} stroke={INK} strokeWidth="1.5" />
-      <g className="cm-anim cm-smoke" fill={C.cream} opacity="0.55">
-        <circle cx="97" cy="-18" r="6" />
-        <circle cx="104" cy="-34" r="8" />
+    <g transform={`translate(300 ${y})`} stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      <g transform="translate(-170 0)">
+        <rect x="0" y="-56" width="70" height="56" fill="#d4c39d" />
+        <path d="M-6 -56 L35 -88 L76 -56 Z" fill={C.brick} />
+        <rect x="26" y="-30" width="18" height="30" fill={INK} />
+        <rect x="8" y="-46" width="12" height="10" fill={C.gold} opacity="0.7" />
       </g>
-      {[14, 44, 74].map((x) => (
-        <rect key={x} x={x} y="58" width="18" height="16" fill={C.gold} opacity="0.55" stroke={INK} strokeWidth="1.2" />
-      ))}
-      <g transform="translate(-6 82)">
-        <g className="cm-anim cm-spin">
-          <circle r="14" fill={C.gold} stroke={INK} strokeWidth="1.5" />
-          {[0, 45, 90, 135].map((a) => (
-            <rect key={a} x="-3" y="-18" width="6" height="36" fill={C.gold} stroke={INK} strokeWidth="1" transform={`rotate(${a})`} />
-          ))}
-          <circle r="5" fill={C.paper} stroke={INK} strokeWidth="1.3" />
-        </g>
+      {/* community hall — its door is on the trail at the stop */}
+      <rect x="-50" y="-72" width="100" height="72" fill="#d8c9a3" />
+      <path d="M-58 -72 L0 -108 L58 -72 Z" fill={C.olive} />
+      <path d="M-12 0 V-34 h24 V0" fill={INK} />
+      <rect x="-40" y="-56" width="16" height="14" fill={C.gold} opacity="0.7" />
+      <rect x="24" y="-56" width="16" height="14" fill={C.gold} opacity="0.7" />
+      {/* notice board: "learn together" sheets */}
+      <g transform="translate(78 0)">
+        <path d="M0 0 V-52 M40 0 V-52" />
+        <rect x="-6" y="-60" width="52" height="30" fill={C.paper} />
+        <path d="M2 -52 h14 M2 -46 h20 M24 -52 h14 M24 -44 h10" strokeWidth="1.2" />
       </g>
     </g>
   );
 }
 
-function Valley() {
+function MountainTrail({ at }) {
+  // 2024 — Algorithm Mountain: trail markers for C, DSA and DAA on the climb, a summit hut
+  const markers = [
+    [610, 'C'],
+    [720, 'DSA'],
+    [820, 'DAA'],
+  ];
+  const top = at(920);
+  return (
+    <g stroke={INK} strokeWidth="1.6" strokeLinejoin="round">
+      {/* switchback hints carved into the slope */}
+      <path d="M560 560 q40 -14 80 -6 M650 520 q40 -16 70 -4 M740 470 q30 -14 60 -2" fill="none" opacity="0.45" />
+      {markers.map(([x, label]) => {
+        const p = at(x);
+        return (
+          <g key={label} transform={`translate(${x + 26} ${p.y + 2})`}>
+            <path d="M0 0 V-46" strokeWidth="2.2" />
+            <path d="M0 -46 h30 l-6 9 l6 9 h-30 Z" fill={C.cream} />
+            <text x="13" y="-33" textAnchor="middle" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700" fill={INK} stroke="none">
+              {label}
+            </text>
+          </g>
+        );
+      })}
+      {/* summit hut — door on the trail at the stop */}
+      <g transform={`translate(920 ${top.y})`}>
+        <rect x="-34" y="-50" width="68" height="50" fill="#cbb991" />
+        <path d="M-42 -50 L0 -84 L42 -50 Z" fill="#a68f62" />
+        <path d="M-10 0 V-28 h20 V0" fill={INK} />
+        <path d="M24 -84 V-120" strokeWidth="2.2" />
+        <path className="cm-anim cm-flag" d="M24 -120 L50 -113 L24 -105 Z" fill={C.brick} />
+        <text x="37" y="-110" textAnchor="middle" fontSize="9" fontFamily="var(--font-mono)" fontWeight="700" fill={C.cream} stroke="none">
+          C
+        </text>
+      </g>
+    </g>
+  );
+}
+
+function River() {
   return (
     <g>
-      {/* river under the bridge */}
-      <path d="M640 640 Q760 616 880 640 L900 720 H620 Z" fill={C.blue} opacity="0.85" />
-      <path className="cm-anim cm-river" d="M660 650 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 M680 676 q20 -6 40 0 t40 0 t40 0 t40 0" fill="none" stroke={C.cream} strokeWidth="2" opacity="0.6" />
-      {/* timber bridge */}
-      <g stroke={INK} strokeWidth="1.8">
-        <path d="M690 592 Q760 570 830 594" fill="none" stroke="#6e5232" strokeWidth="10" />
-        <path d="M690 592 Q760 570 830 594" fill="none" />
-        {[700, 722, 744, 766, 788, 810].map((x) => (
-          <path key={x} d={`M${x} ${590 - Math.sin(((x - 690) / 140) * Math.PI) * 18} v34`} />
-        ))}
-        <path d="M690 560 Q760 538 830 562" fill="none" />
-      </g>
-      {/* reeds */}
-      {[630, 646, 884, 900].map((x) => (
-        <path key={x} d={`M${x} 640 q-4 -20 2 -34 M${x + 4} 640 q4 -16 0 -28`} stroke={C.olive} strokeWidth="2.2" fill="none" />
+      <path d="M1262 520 Q1300 640 1340 640 Q1380 640 1420 520 V720 H1262 Z" fill={C.water} opacity="0.9" />
+      <path className="cm-anim cm-river" d="M1280 600 h120 M1290 624 h100 M1300 650 h80" fill="none" stroke={C.cream} strokeWidth="2" opacity="0.55" />
+    </g>
+  );
+}
+
+function Bridge({ at }) {
+  // timber bridge: the deck IS the trail between the two banks
+  const [x0, x1] = BRIDGE;
+  const deck = [];
+  for (let x = x0; x <= x1; x += 6) deck.push([x, at(x).y]);
+  const d = pathOf(deck);
+  const posts = [];
+  for (let x = x0 + 12; x < x1; x += 30) posts.push([x, at(x).y]);
+  return (
+    <g stroke={INK} strokeWidth="1.8">
+      {posts.map(([x, y]) => (
+        <path key={`p${x}`} d={`M${x} ${y + 4} V${660}`} stroke={C.wood} strokeWidth="6" />
+      ))}
+      <path d={d} fill="none" stroke={C.wood} strokeWidth="12" strokeLinecap="round" />
+      <path d={d} fill="none" strokeWidth="1.4" transform="translate(0 6)" />
+      {/* railing */}
+      <path d={d} fill="none" transform="translate(0 -30)" />
+      {posts.map(([x, y]) => (
+        <path key={`r${x}`} d={`M${x} ${y - 4} V${y - 30}`} strokeWidth="1.6" />
       ))}
     </g>
   );
 }
 
-function Observatory() {
+function Workshop({ y }) {
+  // 2025 — Builder Workshop with React Town's sign and the Unreal Garage (a race car inside)
   return (
-    <g transform="translate(1240 322)">
-      <rect x="-40" y="-30" width="80" height="34" fill="#d4c39d" stroke={INK} strokeWidth="1.8" />
-      <path d="M-44 -30 a44 40 0 0 1 88 0 Z" fill="#c4b38c" stroke={INK} strokeWidth="1.8" />
-      <path d="M-6 -68 V-30 M6 -68 V-30" stroke={INK} strokeWidth="1.2" />
-      <g transform="translate(0 -44)">
+    <g transform={`translate(1650 ${y})`} stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      {/* workshop: door on the trail */}
+      <rect x="-60" y="-70" width="120" height="70" fill="#cbb991" />
+      <path d="M-60 -70 l24 -24 v24 l24 -24 v24 l24 -24 v24 l24 -24 v24 l24 -24 v24" fill="#a68f62" />
+      <path d="M-12 0 V-36 h24 V0" fill={INK} />
+      <g transform="translate(-38 -40)" className="cm-anim cm-spin">
+        <circle r="10" fill={C.gold} />
+        <circle r="4" fill={C.paper} />
+      </g>
+      <rect x="30" y="-52" width="20" height="16" fill={C.gold} opacity="0.6" />
+      {/* React Town sign */}
+      <g transform="translate(-150 0)">
+        <path d="M0 0 V-58 M56 0 V-58" />
+        <rect x="-8" y="-82" width="72" height="26" fill={C.cream} />
+        <text x="28" y="-65" textAnchor="middle" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700" fill={INK} stroke="none">
+          REACT TOWN
+        </text>
+      </g>
+      {/* Unreal Garage: open door, a race car inside */}
+      <g transform="translate(110 0)">
+        <rect x="0" y="-62" width="110" height="62" fill="#b9a780" />
+        <path d="M-6 -62 h122 v-10 h-122 Z" fill={C.brick} />
+        <text x="55" y="-64.5" textAnchor="middle" fontSize="8" fontFamily="var(--font-mono)" fontWeight="700" fill={C.cream} stroke="none">
+          UNREAL GARAGE
+        </text>
+        <rect x="12" y="-46" width="86" height="46" fill={INK} opacity="0.85" />
+        <path d="M24 -12 q6 -16 26 -16 h14 q10 0 20 10 v8 h-60 Z" fill={C.brick} strokeWidth="1.4" />
+        <circle cx="36" cy="-6" r="6" fill={C.paper} />
+        <circle cx="76" cy="-6" r="6" fill={C.paper} />
+      </g>
+    </g>
+  );
+}
+
+function ObservatoryOutpost({ y }) {
+  // 2026 — AI Observatory (door at the stop) with the Backend Outpost beside it
+  return (
+    <g transform={`translate(2140 ${y})`} stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      <rect x="-48" y="-54" width="96" height="54" fill="#d4c39d" />
+      <path d="M-50 -54 a50 46 0 0 1 100 0 Z" fill="#c4b38c" />
+      <path d="M-6 -98 V-54 M6 -98 V-54" strokeWidth="1.2" />
+      <g transform="translate(0 -72)">
         <g className="cm-anim cm-scope">
-          <path d="M-4 0 L40 -30 L46 -22 L2 8 Z" fill={C.blue} stroke={INK} strokeWidth="1.5" />
+          <path d="M-4 0 L42 -30 L48 -22 L2 8 Z" fill="#5d6f82" strokeWidth="1.5" />
         </g>
       </g>
-      <rect x="-10" y="-14" width="20" height="18" fill={INK} opacity="0.8" />
-      {/* contour hatching on the slope */}
-      <path d="M-120 60 q20 -12 40 0 M-150 100 q24 -14 48 0 M90 70 q20 -12 40 0 M120 110 q24 -14 48 0" stroke={INK} strokeWidth="1.2" fill="none" opacity="0.5" />
-      <g className="cm-anim cm-cloud" fill={C.cream} stroke={INK} strokeWidth="1.3" opacity="0.92">
-        <path d="M70 -110 q8 -16 26 -8 q12 -14 28 0 q16 0 12 14 H64 q-6 -2 6 -6 Z" />
+      <path d="M-12 0 V-30 h24 V0" fill={INK} />
+      {/* Backend Outpost: server racks behind slit windows */}
+      <g transform="translate(90 0)">
+        <rect x="0" y="-66" width="120" height="66" fill="#cbb991" />
+        <path d="M0 -66 v-10 h12 v10 h12 v-10 h12 v10 h12 v-10 h12 v10 h12 v-10 h12 v10 h12 v-10 h12 v10 h12 v-10 h12 v10" fill="none" strokeWidth="1.4" />
+        {[14, 46, 78].map((x, i) => (
+          <g key={x}>
+            <rect x={x} y="-54" width="22" height="34" fill={INK} opacity="0.8" />
+            <rect className={`cm-anim cm-led ${i % 2 ? 'cm-led--b' : ''}`} x={x + 6} y="-48" width="10" height="3" fill={C.gold} stroke="none" />
+            <rect className="cm-anim cm-led cm-led--b" x={x + 6} y="-38" width="10" height="3" fill={C.olive} stroke="none" />
+          </g>
+        ))}
+        <text x="60" y="-80" textAnchor="middle" fontSize="9" fontFamily="var(--font-mono)" fontWeight="700" fill={INK} stroke="none">
+          BACKEND OUTPOST
+        </text>
       </g>
     </g>
   );
 }
 
-function Outpost() {
-  return (
-    <g transform="translate(1620 380)">
-      <path d="M0 100 V20 h170 v80 Z" fill="#cbb991" stroke={INK} strokeWidth="1.8" />
-      <path d="M0 20 v-12 h14 v12 h14 v-12 h14 v12 h14 v-12 h14 v12 h14 v-12 h14 v12 h14 v-12 h14 v12 h14 v-12 h14 v12 h14 v-12 h14 v12" fill="none" stroke={INK} strokeWidth="1.6" />
-      <rect x="-18" y="-10" width="30" height="110" fill="#d4c39d" stroke={INK} strokeWidth="1.8" />
-      <path d="M-22 -10 L-3 -34 L16 -10 Z" fill={C.brick} stroke={INK} strokeWidth="1.6" />
-      <path d="M70 100 V64 a15 15 0 0 1 30 0 V100 Z" fill={INK} opacity="0.85" />
-      {/* server racks behind slit windows */}
-      {[20, 120, 140].map((x, i) => (
-        <g key={x}>
-          <rect x={x} y="40" width="16" height="30" fill={INK} opacity="0.75" />
-          <rect className={`cm-anim cm-led ${i % 2 ? 'cm-led--b' : ''}`} x={x + 4} y="46" width="8" height="3" fill={C.gold} />
-          <rect className="cm-anim cm-led cm-led--b" x={x + 4} y="56" width="8" height="3" fill={C.olive} />
-        </g>
-      ))}
-    </g>
-  );
-}
+const ROCKS = [[120, 640, 10], [380, 660, 12], [980, 600, 9], [1180, 560, 8], [1560, 650, 11], [1820, 640, 10], [2060, 660, 12], [2290, 640, 9], [260, 690, 8]];
 
-function Tower() {
-  return (
-    <g transform="translate(1890 500)" stroke={INK} fill="none" strokeWidth="2.4">
-      <path d="M-34 0 L0 -250 L34 0" />
-      <path d="M-26 -60 H26 M-19 -120 H19 M-12 -180 H12 M-26 -60 L19 -120 M26 -60 L-19 -120 M-19 -120 L12 -180 M19 -120 L-12 -180" strokeWidth="1.5" />
-      <g transform="translate(0 -200)">
-        <g className="cm-anim cm-dish">
-          <path d="M0 0 L-30 -10 A32 32 0 0 0 -18 22 Z" fill={C.gold} strokeWidth="1.8" />
-        </g>
-      </g>
-      <rect className="cm-anim cm-beacon" x="-5" y="-262" width="10" height="10" fill={C.brick} stroke="none" />
-    </g>
-  );
-}
-
-function Camp() {
-  return (
-    <g transform="translate(2150 516)">
-      <path d="M40 0 L90 -70 L140 0 Z" fill={C.olive} stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M90 -70 V0 M78 0 L90 -34 L102 0 Z" fill={INK} stroke={INK} strokeWidth="1.4" />
-      <g transform="translate(-60 0)">
-        <path d="M-16 0 h32" stroke="#4e3c28" strokeWidth="6" />
-        <path className="cm-anim cm-fire" d="M-10 -2 L0 -30 L10 -2 Z" fill={C.gold} />
-        <path className="cm-anim cm-fire cm-fire--b" d="M-5 -2 L0 -18 L5 -2 Z" fill={C.brick} />
-      </g>
-      <path d="M170 0 V-90" stroke={INK} strokeWidth="2.4" />
-      <path className="cm-anim cm-flag" d="M170 -90 L204 -82 L170 -72 Z" fill={C.brick} stroke={INK} strokeWidth="1.3" />
-    </g>
-  );
-}
-
-const ROCKS = [[120, 640], [380, 660], [540, 690], [980, 640], [1180, 560], [1330, 600], [1560, 650], [1820, 640], [2060, 660], [2290, 640], [1440, 700], [260, 690]];
-const FLOWERS = [[200, 548], [360, 540], [452, 556], [1030, 500], [1600, 486], [1960, 516], [2240, 532], [2380, 544]];
-
-function NearLayer({ road }) {
-  const ground = `${road} L${MW} ${MH} L0 ${MH} Z`;
-  const pines = [[60, 548], [130, 540], [420, 550], [470, 556], [960, 538], [1010, 520], [1420, 430], [1470, 455], [1560, 470], [2000, 512], [2070, 514], [2320, 532], [2370, 536]];
+function NearLayer({ trail }) {
+  const groundPts = crSample(GROUND);
+  const ground = `${pathOf(groundPts)} L${MW + 40} ${MH} L-40 ${MH} Z`;
+  const y = (x) => trail.at(trail.sAtX(x)).y;
+  const pines = [[60, 548], [130, 540], [470, 548], [1110, 420], [1500, 506], [1960, 422], [2350, 412]];
   return (
     <g>
       <path d={ground} fill={C.ground} stroke={INK} strokeWidth="2" />
-      {/* strata: darker bands following the land */}
       <path d={ground} fill={C.groundDark} transform="translate(0 70)" opacity="0.55" />
       <path d={ground} fill="#3e3020" transform="translate(0 135)" opacity="0.6" />
       <path d={ground} fill="url(#cm-soil)" />
-      {/* grass lip along the surface */}
-      <path d={road} fill="none" stroke={C.olive} strokeWidth="26" transform="translate(0 14)" strokeLinecap="round" />
-      <path d={road} fill="none" stroke={C.hillDark} strokeWidth="3" transform="translate(0 27)" strokeDasharray="2 9" />
-      {/* rocks, stones and flowers scattered in the soil */}
-      {ROCKS.map(([x, y, r], i) => (
-        <g key={i}>
-          <ellipse cx={x} cy={y} rx={r * 1.5} ry={r} fill="#8b7656" stroke={INK} strokeWidth="1.4" />
-          <path d={`M${x - r * 0.8} ${y - r * 0.2} q${r * 0.6} ${-r * 0.6} ${r * 1.2} 0`} stroke="#b5a17a" strokeWidth="1.4" fill="none" />
-        </g>
+      {ROCKS.map(([x, yy, r], i) => (
+        <ellipse key={i} cx={x} cy={yy} rx={r * 1.5} ry={r} fill="#8b7656" stroke={INK} strokeWidth="1.4" />
       ))}
-      {FLOWERS.map(([x, y], i) => (
-        <g key={`f${i}`}>
-          <path d={`M${x} ${y} v-12`} stroke={C.olive} strokeWidth="2" />
-          <circle cx={x} cy={y - 14} r="3.5" fill={i % 2 ? C.cream : C.gold} stroke={INK} strokeWidth="1" />
-        </g>
+      <River />
+      {/* places stand on the trail, behind it */}
+      <Village y={y(300)} />
+      <MountainTrail at={(x) => trail.at(trail.sAtX(x))} />
+      <Workshop y={y(1650)} />
+      <ObservatoryOutpost y={y(2140)} />
+      {pines.map(([x, yy], i) => (
+        <Pine key={i} x={x} y={yy + 4} s={0.9 + (i % 3) * 0.12} fill={i % 2 ? C.olive : C.hillDark} />
       ))}
-      <Valley />
-      {/* the road */}
-      <path d={road} fill="none" stroke={C.road} strokeWidth="12" strokeLinecap="round" />
-      <path d={road} fill="none" stroke={INK} strokeWidth="1.2" strokeDasharray="10 12" opacity="0.5" transform="translate(0 2)" />
-      <Academy />
-      <Workshop />
-      <Observatory />
-      <Outpost />
-      <Tower />
-      <Camp />
-      {pines.map(([x, y], i) => (
-        <Pine key={i} x={x} y={y + 4} s={0.9 + (i % 3) * 0.15} fill={i % 2 ? C.olive : C.hillDark} />
-      ))}
-      {/* birds */}
+      {/* grass lip and the trail itself (drawn from the same curve the explorer walks) */}
+      <path d={trail.road} fill="none" stroke={C.olive} strokeWidth="22" strokeLinecap="round" transform="translate(0 12)" clipPath="url(#cm-banks)" />
+      <path d={trail.road} fill="none" stroke={C.road} strokeWidth="12" strokeLinecap="round" clipPath="url(#cm-banks)" />
+      <path d={trail.road} fill="none" stroke={INK} strokeWidth="1.2" strokeDasharray="10 12" opacity="0.5" transform="translate(0 2)" clipPath="url(#cm-banks)" />
+      <Bridge at={(x) => trail.at(trail.sAtX(x))} />
       <g className="cm-anim cm-birds" fill="none" stroke={INK} strokeWidth="1.8">
-        <path d="M980 180 q7 -7 13 0 q6 -7 13 0" />
-        <path d="M1020 160 q6 -6 11 0 q5 -6 11 0" />
+        <path d="M1080 200 q7 -7 13 0 q6 -7 13 0" />
+        <path d="M1120 180 q6 -6 11 0 q5 -6 11 0" />
       </g>
     </g>
   );
 }
 
 /* ───────────── component ───────────── */
+const SPEED = 300; // map units per second on flat ground
+
 export default function CareerMap() {
   const { reduceMotion } = useMode();
   const [sel, setSel] = useState(journey.length - 1);
+  const [walking, setWalking] = useState(false);
+  const [frame, setFrame] = useState(0);
+  const [facing, setFacing] = useState(1);
+  const [lean, setLean] = useState(0);
+  const [arrived, setArrived] = useState(true);
+  const trail = useMemo(buildTrail, []);
+  const stopS = useMemo(() => STOP_X.map((x) => trail.sAtX(x)), [trail]);
+
   const vp = useRef(null);
   const [size, setSize] = useState({ w: 1200, h: 560 });
   const camX = useMotionValue(0);
@@ -301,10 +371,17 @@ export default function CareerMap() {
   const midX = useTransform(cam, (v) => v * 0.65);
   const drag = useRef(null);
 
+  // the explorer's position along the trail (arc length)
+  const sRef = useRef(stopS[journey.length - 1]);
+  const px = useMotionValue(trail.at(sRef.current).x);
+  const py = useMotionValue(trail.at(sRef.current).y);
+  const left = useTransform(px, (v) => `${(v / MW) * 100}%`);
+  const top = useTransform(py, (v) => `${(v / MH) * 100}%`);
+
   const scale = size.h / MH;
   const mapW = MW * scale;
   const clampX = useCallback((x) => Math.min(0, Math.max(size.w - mapW, x)), [size.w, mapW]);
-  const focus = useCallback((i) => camX.set(clampX(size.w / 2 - STOPS[i].x * scale)), [camX, clampX, size.w, scale]);
+  const follow = useCallback((x) => camX.set(clampX(size.w / 2 - x * scale)), [camX, clampX, size.w, scale]);
 
   useEffect(() => {
     const el = vp.current;
@@ -312,28 +389,82 @@ export default function CareerMap() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  useEffect(() => focus(sel), [focus, sel]);
+  useEffect(() => follow(px.get()), [follow, px]);
+
+  // travel along the trail to the selected stop
+  useEffect(() => {
+    const target = stopS[sel];
+    const put = (s) => {
+      const p = trail.at(s);
+      px.set(p.x);
+      py.set(p.y);
+      return p;
+    };
+    if (reduceMotion) {
+      sRef.current = target;
+      follow(put(target).x);
+      setArrived(true);
+      return undefined;
+    }
+    if (Math.abs(target - sRef.current) < 1) {
+      setArrived(true);
+      return undefined;
+    }
+    setArrived(false);
+    setWalking(true);
+    let raf = 0;
+    let last = performance.now();
+    let stepClock = 0;
+    const dir = Math.sign(target - sRef.current);
+    setFacing(dir);
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const here = trail.at(sRef.current);
+      // climbing (y decreasing in the walking direction) is slower; descending a bit faster
+      const climb = -here.slope * dir;
+      const speed = SPEED * (climb > 0 ? Math.max(0.5, 1 - climb * 0.9) : Math.min(1.25, 1 + -climb * 0.4));
+      let s = sRef.current + dir * speed * dt;
+      if ((dir > 0 && s >= target) || (dir < 0 && s <= target)) s = target;
+      sRef.current = s;
+      const p = put(s);
+      follow(p.x);
+      setLean(Math.max(-12, Math.min(12, Math.atan(p.slope) * (180 / Math.PI) * 0.5 * dir)));
+      stepClock += dt;
+      if (stepClock > 0.13) {
+        stepClock = 0;
+        setFrame((f) => (f + 1) % 2);
+      }
+      if (s === target) {
+        setWalking(false);
+        setLean(0);
+        setArrived(true);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [sel, stopS, trail, reduceMotion, follow, px, py]);
 
   const go = (i) => setSel(Math.max(0, Math.min(journey.length - 1, i)));
-  const road = useMemo(() => smooth(RIDGE), []);
   const step = journey[sel];
-  const stop = STOPS[sel];
   const pct = (x, y) => ({ left: `${(x / MW) * 100}%`, top: `${(y / MH) * 100}%` });
 
   const onDown = (e) => {
     if (e.button !== 0 || e.target.closest('button')) return;
-    drag.current = { x: e.clientX, start: camX.get(), moved: false };
+    drag.current = { x: e.clientX, start: camX.get() };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
   const onMove = (e) => {
     if (!drag.current) return;
-    const dx = e.clientX - drag.current.x;
-    if (Math.abs(dx) > 3) drag.current.moved = true;
-    camX.set(clampX(drag.current.start + dx));
+    camX.set(clampX(drag.current.start + (e.clientX - drag.current.x)));
   };
   const onUp = () => {
     drag.current = null;
   };
+
+  const sprite = walking ? (frame ? HERO.run1 : HERO.run2) : HERO.idle;
 
   return (
     <div className="cmap">
@@ -351,7 +482,7 @@ export default function CareerMap() {
           if (e.key === 'ArrowLeft') go(sel - 1);
         }}
         role="group"
-        aria-label="Career campaign map. Use the stops or arrow keys to travel."
+        aria-label="Learning journey campaign map. Use the stops or arrow keys to travel along the trail."
       >
         <div className="cmap__sky" aria-hidden="true">
           <i className="cmap__sun" />
@@ -370,36 +501,44 @@ export default function CareerMap() {
               <pattern id="cm-soil" width="60" height="40" patternUnits="userSpaceOnUse">
                 <path d="M6 12 h10 M30 28 h8 M44 8 h6" stroke="#4e3c28" strokeWidth="3" />
               </pattern>
+              {/* the trail's ground surface is hidden over the river: there the bridge deck carries it */}
+              <clipPath id="cm-banks">
+                <rect x="-100" y="0" width={BRIDGE[0] + 100} height={MH} />
+                <rect x={BRIDGE[1]} y="0" width={MW} height={MH} />
+              </clipPath>
             </defs>
-            <NearLayer road={road} />
+            <NearLayer trail={trail} />
           </svg>
 
-          {STOPS.map((s, i) => (
-            <button
-              key={s.place}
-              type="button"
-              className={`cmap__stop ${i === sel ? 'is-on' : ''} ${journey[i].current ? 'is-now' : ''}`}
-              style={pct(s.x, s.y)}
-              onClick={() => go(i)}
-              aria-pressed={i === sel}
-              aria-label={`${s.place}: ${journey[i].title}, ${journey[i].period}`}
-            >
-              <span className="cmap__post" aria-hidden="true" />
-              <span className="cmap__sign">
-                <small>{journey[i].period}</small>
-                {s.place}
-              </span>
-            </button>
-          ))}
+          {/* signposts stand just behind each door, clear of the explorer */}
+          {STOP_X.map((x, i) => {
+            const y = trail.at(stopS[i]).y;
+            const j = journey[i];
+            return (
+              <button
+                key={j.place}
+                type="button"
+                className={`cmap__stop ${i === sel ? 'is-on' : ''} ${j.current ? 'is-now' : ''}`}
+                style={pct(x + 46, y)}
+                onClick={() => go(i)}
+                aria-pressed={i === sel}
+                aria-label={`${j.period} — ${j.place}: ${j.title}`}
+              >
+                <span className="cmap__post" aria-hidden="true" />
+                <span className="cmap__sign">
+                  <small>{j.period}</small>
+                  {j.place}
+                  {i === sel && arrived && <em className="cmap__quest">{j.quest}</em>}
+                </span>
+              </button>
+            );
+          })}
 
-          <motion.div
-            className="cmap__player"
-            initial={false}
-            animate={pct(stop.x - 36, stop.y)}
-            transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 45, damping: 14 }}
-            aria-hidden="true"
-          >
-            <SpriteSVG map={HERO.idle} px={3} className="cmap__sprite" />
+          {/* the explorer: always on the trail */}
+          <motion.div className="cmap__player" style={{ left, top }} aria-hidden="true">
+            <div className="cmap__body" style={{ transform: `scaleX(${facing}) rotate(${lean * facing}deg)` }}>
+              <SpriteSVG map={sprite} px={3} className="cmap__sprite" />
+            </div>
           </motion.div>
         </motion.div>
         <p className="cmap__hint" aria-hidden="true">
@@ -419,7 +558,7 @@ export default function CareerMap() {
         >
           <header className="cmap__head">
             <p className="cmap__kicker">
-              Stop {sel + 1} of {journey.length} · {stop.place}
+              Stage {sel + 1} of {journey.length} · {step.place} · {step.quest}
             </p>
             <h3>{step.title}</h3>
             <p className="cmap__period">
@@ -430,7 +569,7 @@ export default function CareerMap() {
           <p className="cmap__text">{step.text}</p>
           <div className="cmap__cols">
             <div>
-              <h4>Achievements</h4>
+              <h4>Quest log</h4>
               <ul className="cmap__ach">
                 {step.achievements.map((a) => (
                   <li key={a}>{a}</li>
@@ -438,7 +577,7 @@ export default function CareerMap() {
               </ul>
             </div>
             <div>
-              <h4>Technologies learned</h4>
+              <h4>Skills gained</h4>
               <ul className="cmap__tech">
                 {step.loot.map((l) => (
                   <li key={l}>{l}</li>

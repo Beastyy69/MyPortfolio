@@ -43,39 +43,111 @@
   transform-origin: left;
   box-shadow: none;
 }
+.tl__track {
+  position: relative;
+}
+.tl__spine {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 40px;
+  width: 24px;
+  height: calc(100% - 48px);
+  overflow: visible;
+  pointer-events: none;
+}
+.tl__spine-base {
+  fill: none;
+  stroke: rgba(167, 185, 163, 0.18);
+  stroke-width: 1.5;
+}
+.tl__spine-grow {
+  fill: none;
+  stroke: #b89b68;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
 .tl__list {
-  border-left: 1px solid var(--border);
+  position: relative;
+  display: grid;
+  gap: clamp(40px, 6vw, 80px);
+  list-style: none;
+  margin: 0;
+  padding: 0 0 20px;
 }
 .tl__item {
+  position: relative;
   display: grid;
-  grid-template-columns: 70px 1fr;
-  gap: 20px;
-  padding: 0 0 clamp(60px, 8vw, 100px) 30px;
-  opacity: 0.5;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 0;
+  opacity: 0.55;
   transition: opacity 0.5s;
 }
-.tl__item.is-active {
+.tl__item.is-active,
+.tl__item.is-past {
   opacity: 1;
 }
-.tl__num {
-  font-family: var(--font-display);
-  font-size: 2.4rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.05em;
+.tl__marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding-left: 4px;
+}
+.tl__marker i {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  transform: rotate(45deg);
+  background: #0c1018;
+  border: 1.5px solid rgba(167, 185, 163, 0.55);
+  transition: background 0.4s, border-color 0.4s;
+}
+.tl__marker b {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--text-dim);
   transition: color 0.4s;
 }
-.tl__item.is-active .tl__num {
-  color: var(--accent);
+.tl__marker::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  margin-right: 12px;
+  background: rgba(167, 185, 163, 0.25);
+}
+.tl__item.is-active .tl__marker i,
+.tl__item.is-past .tl__marker i {
+  background: #b89b68;
+  border-color: #b89b68;
+}
+.tl__item.is-active .tl__marker b {
+  color: #d8c59d;
+}
+.tl__card {
+  position: relative;
+  z-index: 1;
+  padding: clamp(20px, 2.2vw, 30px);
+  border-radius: 10px;
+  background: rgba(21, 28, 41, 0.86);
+  border: 1px solid var(--border);
+  transition: border-color 0.4s, background 0.4s;
+}
+.tl__item.is-active .tl__card {
+  border-color: rgba(184, 155, 104, 0.45);
+  background: rgba(24, 32, 47, 0.95);
 }
 .tl__when {
   display: flex;
   align-items: center;
   gap: 14px;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--accent-3);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a7b9a3;
 }
 .tl__now {
   display: inline-flex;
@@ -85,20 +157,71 @@
 }
 .tl__item h3 {
   margin-top: 8px;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  letter-spacing: -0.04em;
+  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.tl__year {
+  color: #d8c59d;
 }
 .tl__text {
   margin-top: 12px;
-  max-width: 560px;
+  max-width: 62ch;
   color: var(--text-muted);
-  font-size: 1.02rem;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.tl__did {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tl__did li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.tl__did li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 7px;
+  height: 1.5px;
+  background: #b89b68;
 }
 .tl__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .tl {
+    grid-template-columns: 1fr;
+  }
+  .tl__aside {
+    position: relative;
+    top: 0;
+  }
+  .tl__period {
+    font-size: clamp(3.4rem, 16vw, 6rem);
+  }
+}
+@media (max-width: 560px) {
+  .tl__item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .tl__spine {
+    display: none;
+  }
+  .tl__marker::after {
+    display: none;
+  }
 }
 
 /* ───────────── Retro: campaign map ───────────── */
