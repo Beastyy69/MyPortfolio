@@ -1,0 +1,96 @@
+/* ───────────── World change: tile takeover ───────────── */
+.ws {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  overflow: hidden;
+  pointer-events: all;
+  display: grid;
+  place-items: center;
+}
+.ws__dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 16, 24, 0.72);
+}
+.ws__dim.is-warm {
+  background: rgba(42, 31, 23, 0.6);
+}
+.ws__net {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+.ws__netline {
+  stroke: rgba(167, 185, 163, 0.55);
+  stroke-width: 1.2;
+}
+.ws__netnode {
+  fill: #f4f0e8;
+}
+.ws__tiles {
+  position: absolute;
+  inset: 0;
+  perspective: 1400px;
+}
+.ws__tile {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+  box-shadow: inset 0 0 0 1px rgba(29, 26, 25, 0.18);
+  backface-visibility: hidden;
+}
+.ws__flag {
+  width: 46%;
+  height: 46%;
+  transform-origin: 50% 100%;
+}
+.ws__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #b89b68;
+  box-shadow: 0 0 0 4px rgba(184, 155, 104, 0.18);
+}
+.ws__plaque {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: clamp(18px, 2.2vw, 30px) clamp(26px, 3.4vw, 54px);
+  text-align: center;
+}
+.ws__plaque strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.4vw, 3.3rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.ws__plaque span {
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 0.8vw, 0.82rem);
+  letter-spacing: 0.26em;
+}
+.ws__plaque.is-game {
+  background: #e9dcc0;
+  color: #1d1a19;
+  border: 3px solid #1d1a19;
+  box-shadow: 8px 8px 0 #1d1a19;
+}
+.ws__plaque.is-game span {
+  color: #5e2430;
+}
+.ws__plaque.is-ai {
+  background: rgba(12, 16, 24, 0.92);
+  color: #f4f0e8;
+  border: 1px solid rgba(167, 185, 163, 0.35);
+}
+.ws__plaque.is-ai span {
+  color: #b89b68;
+}
+
