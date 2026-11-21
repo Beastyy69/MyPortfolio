@@ -561,6 +561,22 @@
   .footer__actions {
     justify-items: start;
   }
+  /* comfortable touch targets without changing the look */
+  .footer__links {
+    gap: 2px 22px;
+  }
+  .footer__links a,
+  .footer__socials a {
+    display: inline-flex !important;
+    align-items: center;
+    min-height: 40px;
+  }
+  .footer__socials {
+    gap: 4px 22px;
+  }
+  .ip__open {
+    min-height: 40px;
+  }
 }
 @media (max-width: 640px) {
   .ep__shape {
