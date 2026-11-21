@@ -1,0 +1,8 @@
+node_modules
+dist
+
+# local tooling
+.claude/
+
+# duplicate of public/audio/doomsday-instrumental.mp3, not used by the site
+Juice WRLD & Cordae - Doomsday (Instrumental).mp3
