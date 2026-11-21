@@ -1,0 +1,407 @@
+/* ───────────── Profile modal ───────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(14, 16, 22, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+[data-mode='retro'] .modal {
+  background: rgba(27, 21, 18, 0.92);
+  backdrop-filter: none;
+}
+.modal__dialog {
+  position: relative;
+  width: min(980px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border-radius: 28px;
+  background: linear-gradient(160deg, #1c2130, #12151e 70%);
+  border: 1px solid rgba(244, 240, 232, 0.25);
+  box-shadow: 0 60px 120px -40px rgba(167, 185, 163, 0.55);
+}
+.modal__dialog--retro {
+  border-radius: 0;
+  background: #1b1512;
+  border: 3px solid var(--accent);
+  box-shadow: 12px 12px 0 var(--accent-2);
+}
+.modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--text);
+  background: rgba(12, 16, 24, 0.7);
+  border: 1px solid var(--border-strong);
+  transition: background-color 0.2s, color 0.2s;
+}
+.modal__close:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.modal__dialog--retro .modal__close {
+  position: static;
+  border-radius: 0;
+  border: 2px solid var(--accent-2);
+  margin-left: auto;
+}
+
+/* Developer Desk */
+.desk {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+}
+.desk__photo {
+  position: relative;
+  min-height: 100%;
+}
+.desk__photo img {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  object-position: 46% 25%;
+  border-radius: 28px 0 0 28px;
+}
+.desk__status {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(12, 16, 24, 0.75);
+  border: 1px solid rgba(127, 160, 143, 0.4);
+}
+.desk__body {
+  padding: clamp(24px, 4vw, 44px);
+}
+.desk__body .mono-label {
+  color: var(--accent-3);
+}
+.desk__body h2 {
+  margin-top: 8px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.05em;
+}
+.desk__role {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--accent);
+  margin-top: 6px;
+}
+.desk__intro {
+  margin-top: 16px;
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+.desk__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.desk__cols h3 {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+.desk__cols h3:not(:first-child) {
+  margin-top: 18px;
+}
+.desk__cols li {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.92rem;
+}
+.desk__cols li .icon {
+  color: var(--success);
+  flex: none;
+  margin-top: 4px;
+}
+.desk__cols p {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+}
+.desk__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+}
+.desk__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  transition: border-color 0.2s, color 0.2s;
+}
+.desk__link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.desk__cv {
+  min-height: 44px;
+}
+
+/* Player Profile (retro) */
+.pp {
+  padding: clamp(18px, 3vw, 28px);
+}
+.pp__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 3px dashed rgba(201, 164, 92, 0.4);
+}
+.pp__head h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  font-size: clamp(0.8rem, 2.4vw, 1.2rem);
+  color: var(--accent-4);
+}
+.pp__grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+.pp__portrait {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 4px solid #000;
+  outline: 3px solid var(--accent-4);
+  background: linear-gradient(180deg, #3a2a22, #2b201b);
+}
+.pp__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 46% 22%;
+}
+.pp__stats {
+  display: grid;
+  gap: 4px;
+  margin: 16px 0 0;
+  font-family: 'VT323', monospace;
+  font-size: 1.25rem;
+}
+.pp__stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px dashed rgba(201, 164, 92, 0.25);
+}
+.pp__stats dt {
+  color: var(--text-dim);
+}
+.pp__stats dd {
+  margin: 0;
+  color: var(--accent);
+  text-align: right;
+}
+.pp__xp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-family: 'VT323', monospace;
+  font-size: 1.2rem;
+  color: var(--accent-4);
+}
+.pp__xp i {
+  flex: 1;
+  height: 12px;
+  padding: 1px;
+  border: 2px solid var(--text);
+}
+.pp__xp b {
+  display: block;
+  width: 78%;
+  height: 100%;
+  background: var(--accent-3);
+}
+.pp__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pp__tabs button {
+  padding: 10px 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--text-muted);
+  border: 2px solid rgba(201, 164, 92, 0.35);
+  background: #000;
+}
+.pp__tabs button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.pp__tabs button.is-on {
+  background: var(--accent);
+  color: #1b1512;
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent-2);
+}
+.pp__tabs .pp__arrow {
+  color: var(--accent-4);
+  border-color: var(--accent-4);
+}
+.pp__view {
+  min-height: 260px;
+  margin-top: 16px;
+  padding: 18px;
+  border: 2px solid rgba(201, 164, 92, 0.35);
+  background: #241b17;
+  overflow: hidden;
+}
+.pp__bio p {
+  color: var(--text);
+  font-size: 1.02rem;
+}
+.pp__quest {
+  margin-top: 14px;
+  font-family: 'VT323', monospace;
+  font-size: 1.25rem !important;
+  color: var(--accent-3) !important;
+}
+.pp__loc {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 12px;
+  color: var(--text-muted) !important;
+}
+.pp__loadout {
+  display: grid;
+  gap: 12px;
+}
+.pp__loadout li {
+  display: grid;
+  gap: 4px;
+}
+.pp__slot {
+  width: max-content;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  padding: 5px 7px;
+  color: #1b1512;
+  background: var(--tone);
+}
+.pp__items {
+  font-family: 'VT323', monospace;
+  font-size: 1.3rem;
+}
+.pp__achs {
+  display: grid;
+  gap: 10px;
+}
+.pp__achs li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+.pp__achs small {
+  display: block;
+  font-family: 'VT323', monospace;
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+.pp__menu {
+  display: grid;
+  gap: 10px;
+}
+.pp__menu a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  border: 2px solid rgba(201, 164, 92, 0.4);
+  background: #000;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+.pp__menu a:hover,
+.pp__menu a:focus-visible {
+  transform: translateX(6px);
+  border-color: var(--accent-4);
+  box-shadow: 4px 4px 0 var(--accent-2);
+}
+.pp__key {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #1b1512;
+  background: var(--accent-3);
+  flex: none;
+}
+.pp__go {
+  margin-left: auto;
+  color: var(--accent-4);
+}
+.pp__hint {
+  margin-top: 10px;
+  font-family: 'VT323', monospace;
+  font-size: 1.05rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 760px) {
+  .desk,
+  .pp__grid,
+  .desk__cols {
+    grid-template-columns: 1fr;
+  }
+  .desk__photo img {
+    border-radius: 28px 28px 0 0;
+    max-height: 300px;
+  }
+  .pp__card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .pp__xp {
+    grid-column: 1 / -1;
+  }
+  .pp__stats {
+    margin: 0;
+  }
+}
