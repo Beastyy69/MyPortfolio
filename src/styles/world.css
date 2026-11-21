@@ -1907,3 +1907,10 @@
     top: -100px;
   }
 }
+
+/* comfortable touch targets on phones */
+@media (max-width: 760px) {
+  .amap__pager button {
+    min-height: 40px;
+  }
+}
