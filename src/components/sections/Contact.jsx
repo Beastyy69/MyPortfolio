@@ -182,10 +182,16 @@ function Console() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || String(data.success) !== 'true') throw new Error(data.message || 'send failed');
-      setSent(true);
+      if (res.ok && String(data.success) === 'true') {
+        setSent(true);
+      } else if (/activat/i.test(data.message || '')) {
+        // FormSubmit's one-time setup: the inbox owner must click "Activate Form" first
+        setFailed('activation');
+      } else {
+        setFailed('error');
+      }
     } catch {
-      setFailed(true);
+      setFailed('error');
     } finally {
       setSending(false);
     }
@@ -255,7 +261,9 @@ function Console() {
                 {sending ? 'Sending…' : 'Send transmission'}
               </Button>
               <p className="console__note" role={failed ? 'alert' : undefined}>
-                {failed ? (
+                {failed === 'activation' ? (
+                  <>Almost ready — the form is waiting for a one‑time activation. Please email <a href={`mailto:${profile.email}`}>{profile.email}</a> for now.</>
+                ) : failed ? (
                   <>
                     Couldn’t send right now — please email <a href={`mailto:${profile.email}`}>{profile.email}</a>
                   </>

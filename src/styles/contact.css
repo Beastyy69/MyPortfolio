@@ -208,11 +208,11 @@
 .console__fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 28px;
+  gap: 16px 18px;
 }
+/* fields: soft filled panels (no underlines); the label floats inside */
 .fld {
   position: relative;
-  padding-top: 22px;
 }
 .fld--full {
   grid-column: 1 / -1;
@@ -220,50 +220,57 @@
 .fld input,
 .fld textarea {
   width: 100%;
-  padding: 10px 26px 12px 0;
-  border: 0;
-  border-bottom: 1px solid var(--border-strong);
-  background: transparent;
-  font-size: 1.15rem;
+  padding: 26px 42px 10px 16px;
+  border: 1px solid rgba(244, 240, 232, 0.12);
+  border-radius: 10px;
+  background: rgba(12, 16, 24, 0.55);
+  font-size: 1.08rem;
+  color: var(--text);
   resize: none;
   outline: none;
-  border-radius: 0;
+  transition: border-color 0.25s, background 0.25s;
+}
+.fld textarea {
+  min-height: 140px;
+}
+.fld input:hover,
+.fld textarea:hover {
+  border-color: rgba(244, 240, 232, 0.22);
+}
+.fld input:focus,
+.fld textarea:focus {
+  border-color: rgba(184, 155, 104, 0.75);
+  background: rgba(12, 16, 24, 0.75);
+}
+/* keep browser autofill in the site's colours */
+.fld input:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px #121824 inset;
+  caret-color: var(--text);
 }
 .fld label {
   position: absolute;
-  left: 0;
-  top: 32px;
+  left: 17px;
+  top: 18px;
   color: var(--text-dim);
-  font-size: 1.05rem;
+  font-size: 1rem;
   pointer-events: none;
   transform-origin: left top;
-  transition: transform 0.35s var(--ease), color 0.3s;
+  transition: transform 0.3s var(--ease), color 0.3s;
 }
 .fld input:focus + label,
 .fld textarea:focus + label,
 .fld.has-value label {
-  transform: translateY(-28px) scale(0.78);
-  color: var(--accent);
+  transform: translateY(-9px) scale(0.76);
+  color: #d8c59d;
 }
 .fld__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  margin-top: -2px;
-  background: var(--gradient);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.5s var(--ease);
-}
-.fld input:focus ~ .fld__line,
-.fld textarea:focus ~ .fld__line {
-  transform: scaleX(1);
+  display: none;
 }
 .fld__ok {
   position: absolute;
-  right: 0;
-  top: 36px;
+  right: 14px;
+  top: 20px;
   color: var(--success);
 }
 .fld__hint {
@@ -273,7 +280,7 @@
 }
 .fld.has-error input,
 .fld.has-error textarea {
-  border-bottom-color: rgba(217, 185, 138, 0.6);
+  border-color: rgba(217, 185, 138, 0.6);
 }
 .console__send {
   display: flex;
@@ -302,7 +309,7 @@
 [data-mode='retro'] .fld label {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.6rem;
-  top: 36px;
+  top: 20px;
 }
 [data-mode='retro'] .fld input,
 [data-mode='retro'] .fld textarea {
@@ -310,11 +317,17 @@
   font-size: 1.5rem;
   color: var(--accent-3);
   caret-color: var(--accent-3);
-  border-bottom: 2px dashed rgba(201, 164, 92, 0.5);
+  border: 2px solid rgba(201, 164, 92, 0.45);
+  border-radius: 0;
+  background: rgba(27, 21, 18, 0.7);
 }
-[data-mode='retro'] .fld__line {
-  height: 3px;
-  background: var(--accent-3);
+[data-mode='retro'] .fld input:focus,
+[data-mode='retro'] .fld textarea:focus {
+  border-color: var(--accent-3);
+}
+[data-mode='retro'] .fld input:-webkit-autofill {
+  -webkit-text-fill-color: var(--accent-3);
+  -webkit-box-shadow: 0 0 0 1000px #1b1512 inset;
 }
 [data-mode='retro'] .console__note {
   font-family: 'VT323', monospace;
@@ -419,6 +432,7 @@
   pointer-events: none;
 }
 .console__note a {
-  color: var(--text);
-  text-decoration: underline;
+  color: #d8c59d;
+  text-decoration: none;
+  border-bottom: 0;
 }
