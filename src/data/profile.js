@@ -14,7 +14,7 @@ export const profile = {
   email: 'mohitshaw236@gmail.com',
   github: 'https://github.com/Beastyy69',
   // TODO: replace with your real LinkedIn profile URL
-  linkedin: 'https://www.linkedin.com/',
+  linkedin: 'https://www.linkedin.com/in/harshitshaw/',
   resume: '/Harshit_Shaw_Resume.pdf',
   photo,
   // Second photo used in Game mode (cartridge cover, player profile).
